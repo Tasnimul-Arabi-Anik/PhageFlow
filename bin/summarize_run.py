@@ -28,12 +28,17 @@ def main() -> int:
         collect_optional_rows(
             samplesheet=None,
             root=args.outdir,
+            trnascan_artifacts=[],
+            bacphlip_artifacts=[],
             checkv_artifacts=[],
+            abricate_artifacts=[],
             pharokka_artifacts=[],
             genomad_artifacts=[],
             genomad_logs=[],
             phold_artifacts=[],
             phold_logs=[],
+            iphop_artifacts=[],
+            iphop_logs=[],
             clinker_artifacts=[],
         )
     )

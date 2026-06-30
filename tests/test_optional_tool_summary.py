@@ -5,6 +5,7 @@ import csv
 import json
 import subprocess
 import sys
+import tarfile
 import tempfile
 from pathlib import Path
 
@@ -112,9 +113,54 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     assert summary["status_counts"]["not_run"] == 8
 
 
+def run_completed_utility_regression(tmp_path: Path) -> None:
+    run_root = tmp_path / "run"
+    write(
+        run_root / "00_inputs" / "samplesheet.normalized.tsv",
+        "sample_id\tfasta\trole\thost_id\taccession\nsample_a\t/a.fa\tquery\t\t\n",
+    )
+    write(run_root / "00_inputs" / "validation_summary.tsv", "metric\tvalue\nsamples\t1\n")
+    write(run_root / "99_report" / "index.html", "<html><body>ok</body></html>\n")
+    write(run_root / "99_report" / "tables" / "optional_tool_summary.tsv", "tool\tstatus\n")
+
+    summary_json = tmp_path / "summary.json"
+    package_tar = tmp_path / "package.tar.gz"
+    subprocess.run(
+        [
+            sys.executable,
+            str(REPO / "bin" / "summarize_run.py"),
+            "--outdir",
+            str(run_root),
+            "--output",
+            str(summary_json),
+        ],
+        check=True,
+    )
+    summary = json.loads(summary_json.read_text())
+    assert summary["optional_tool_summary"]["tool_counts"]["iphop"] == 1
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(REPO / "bin" / "package_run.py"),
+            "--outdir",
+            str(run_root),
+            "--output",
+            str(package_tar),
+            "--force",
+        ],
+        check=True,
+    )
+    with tarfile.open(package_tar, "r:gz") as tar:
+        names = set(tar.getnames())
+    assert "phageflow_package/phageflow_optional_tool_summary.tsv" in names
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
-        run_optional_tool_summary_regression(Path(tmp))
+        root = Path(tmp)
+        run_optional_tool_summary_regression(root / "optional")
+        run_completed_utility_regression(root / "completed")
     return 0
 
 
