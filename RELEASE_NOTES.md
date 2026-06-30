@@ -1,5 +1,11 @@
 # PhageFlow Release Notes
 
+## Unreleased
+
+v0.4 analysis-expansion first pass:
+
+- Expanded optional summaries to include tRNAscan-SE, BACPHLIP, and ABRicate artifacts while keeping optional modules disabled by default.
+
 ## v0.3.0-validated - 2026-07-01
 
 PhageFlow v0.3.0 is validated as a local, reproducible software workflow for lightweight single-genome and small-cohort phage genome analysis. This release keeps biological interpretation conservative and treats report outputs as software artifacts, not manuscript-grade conclusions.

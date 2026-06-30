@@ -499,7 +499,7 @@ def main() -> int:
                     ok &= check_software(results, versions, tool)
             else:
                 ok &= check_optional_module(results, outdir, module, sample_count, versions)
-                if module in {"checkv", "pharokka", "genomad", "phold", "clinker"}:
+                if module in {"trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "clinker"}:
                     ok &= check_optional_summary_module(results, tables_dir, module, sample_count)
 
     expected_summary_modules = [module for module in ["checkv", "pharokka", "genomad", "phold", "clinker"] if getattr(args, f"expect_{module}_summary")]

@@ -132,10 +132,16 @@ workflow {
 
     if (paramEnabled(params.run_trnascan)) {
         TRNASCAN(samples_ch)
+        trnascan_artifacts_ch = TRNASCAN.out.table.map { sample_id, table -> table }.collect()
+    } else {
+        trnascan_artifacts_ch = Channel.value([])
     }
 
     if (paramEnabled(params.run_bacphlip)) {
         BACPHLIP(samples_ch)
+        bacphlip_artifacts_ch = BACPHLIP.out.log.map { sample_id, log -> log }.collect()
+    } else {
+        bacphlip_artifacts_ch = Channel.value([])
     }
 
     if (paramEnabled(params.run_checkv)) {
@@ -147,6 +153,9 @@ workflow {
 
     if (paramEnabled(params.run_abricate)) {
         ABRICATE(samples_ch)
+        abricate_artifacts_ch = ABRICATE.out.table.map { sample_id, table -> table }.collect()
+    } else {
+        abricate_artifacts_ch = Channel.value([])
     }
 
     def needs_pharokka = paramEnabled(params.run_pharokka) || paramEnabled(params.run_phold) || paramEnabled(params.run_clinker)
@@ -190,7 +199,10 @@ workflow {
 
     OPTIONAL_TOOL_SUMMARY(
         VALIDATE_SAMPLESHEET.out.samplesheet,
+        trnascan_artifacts_ch,
+        bacphlip_artifacts_ch,
         checkv_artifacts_ch,
+        abricate_artifacts_ch,
         pharokka_artifacts_ch,
         genomad_artifacts_ch,
         genomad_logs_ch,

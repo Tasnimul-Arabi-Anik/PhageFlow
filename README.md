@@ -86,7 +86,7 @@ bash bin/phageflow structural-summary \
   --output results/my_phage_structural_summary.tsv
 ```
 
-Summarize optional CheckV/Pharokka/geNomad/Phold/clinker artifacts without rerunning the workflow:
+Summarize optional-tool artifacts without rerunning the workflow:
 
 ```bash
 bash bin/phageflow optional-summary \
@@ -276,7 +276,7 @@ Outputs are written under `--outdir`:
 - `99_report/tables/`: key downloadable TSV files.
 - `99_report/tables/claim_evidence_matrix.tsv`: software claim-to-artifact evidence matrix with limitations.
 - `99_report/tables/marker_provenance.tsv`: marker alignment/tree provenance table when marker-tree outputs are enabled.
-- `99_report/tables/optional_tool_summary.tsv`: optional CheckV/Pharokka/geNomad/Phold/clinker artifact status, table shapes, sizes, and checksums.
+- `99_report/tables/optional_tool_summary.tsv`: optional tRNAscan-SE/BACPHLIP/ABRicate/CheckV/Pharokka/geNomad/Phold/clinker artifact status, table shapes, sizes, and checksums.
 - `99_report/important_files.tsv`: important output manifest.
 - `99_report/validation_manifest.json`: report-level QA manifest.
 - `99_report/software_versions.tsv`: software/runtime version capture.
@@ -318,7 +318,7 @@ python3 bin/validate_phageflow_run.py \
   --expect-phold
 ```
 
-The validator checks the dashboard, manifests, report tables, figure counts, TIFF outputs, BLASTN intergenomic similarity tables, local reference-context tables when requested with `--expect-reference-context`, marker-tree tables when present, pangenome presence/absence rows, and any optional modules explicitly requested with `--expect-optional`, `--expect-lite-optionals`, `--expect-publication-optionals`, or per-module flags such as `--expect-pharokka`; marker-tree runs can be checked with `--expect-marker-tree`. For optional CheckV/Pharokka/geNomad/Phold/clinker modules, expected-module validation also checks `99_report/tables/optional_tool_summary.tsv`.
+The validator checks the dashboard, manifests, report tables, figure counts, TIFF outputs, BLASTN intergenomic similarity tables, local reference-context tables when requested with `--expect-reference-context`, marker-tree tables when present, pangenome presence/absence rows, and any optional modules explicitly requested with `--expect-optional`, `--expect-lite-optionals`, `--expect-publication-optionals`, or per-module flags such as `--expect-pharokka`; marker-tree runs can be checked with `--expect-marker-tree`. Expected optional modules also require matching rows in `99_report/tables/optional_tool_summary.tsv`.
 
 Completed-run utilities:
 
@@ -330,7 +330,7 @@ bash bin/phageflow structural-summary --outdir phageflow_validation_mmseqs --out
 bash bin/phageflow package --outdir phageflow_validation_mmseqs --output /tmp/phageflow_package.tar.gz
 ```
 
-`summarize` reports sanitized artifact counts, anonymous TSV/figure IDs, file sizes, checksums, validation-manifest status, optional-screen artifact status, optional-tool artifact status, structural-artifact status, and generic PASS/FAIL/WARN/ERROR marker counts. `safety-summary` reports optional safety-related artifact presence and row counts without printing feature names. `optional-summary` reports CheckV/Pharokka/geNomad/Phold/clinker artifact presence, table shapes, sizes, and checksums without printing annotation values. `structural-summary` reports structural-annotation artifact classes, table shapes, sizes, and checksums without printing annotation values. `package` creates a report/QA archive with relative paths, package checksums, optional-screen, optional-tool, and structural summaries, and the sanitized artifact summary.
+`summarize` reports sanitized artifact counts, anonymous TSV/figure IDs, file sizes, checksums, validation-manifest status, optional-screen artifact status, optional-tool artifact status, structural-artifact status, and generic PASS/FAIL/WARN/ERROR marker counts. `safety-summary` reports optional safety-related artifact presence and row counts without printing feature names. `optional-summary` reports optional-tool artifact presence, table shapes, sizes, and checksums without printing annotation values. `structural-summary` reports structural-annotation artifact classes, table shapes, sizes, and checksums without printing annotation values. `package` creates a report/QA archive with relative paths, package checksums, optional-screen, optional-tool, and structural summaries, and the sanitized artifact summary.
 
 Compare completed pangenome runs:
 

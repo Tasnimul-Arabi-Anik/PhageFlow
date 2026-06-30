@@ -215,7 +215,10 @@ process OPTIONAL_TOOL_SUMMARY {
 
     input:
     path samplesheet
+    path trnascan_artifacts
+    path bacphlip_artifacts
     path checkv_artifacts
+    path abricate_artifacts
     path pharokka_artifacts
     path genomad_artifacts
     path genomad_logs
@@ -228,7 +231,10 @@ process OPTIONAL_TOOL_SUMMARY {
     path "optional_tool_summary.json", emit: summary_json
 
     script:
+    def trnascanArgs = trnascan_artifacts.collect { "--trnascan-artifact ${it}" }.join(' ')
+    def bacphlipArgs = bacphlip_artifacts.collect { "--bacphlip-artifact ${it}" }.join(' ')
     def checkvArgs = checkv_artifacts.collect { "--checkv-artifact ${it}" }.join(' ')
+    def abricateArgs = abricate_artifacts.collect { "--abricate-artifact ${it}" }.join(' ')
     def pharokkaArgs = pharokka_artifacts.collect { "--pharokka-artifact ${it}" }.join(' ')
     def genomadArgs = genomad_artifacts.collect { "--genomad-artifact ${it}" }.join(' ')
     def genomadLogArgs = genomad_logs.collect { "--genomad-log ${it}" }.join(' ')
@@ -238,7 +244,10 @@ process OPTIONAL_TOOL_SUMMARY {
     """
     python3 ${projectDir}/bin/optional_tool_summary.py \
         --samplesheet "${samplesheet}" \
+        ${trnascanArgs} \
+        ${bacphlipArgs} \
         ${checkvArgs} \
+        ${abricateArgs} \
         ${pharokkaArgs} \
         ${genomadArgs} \
         ${genomadLogArgs} \

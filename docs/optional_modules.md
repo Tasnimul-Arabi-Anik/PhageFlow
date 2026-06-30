@@ -91,7 +91,7 @@ bash bin/phageflow validate \
   --expect-pharokka
 ```
 
-The optional validator checks software-version records, expected files under `05_optional/`, and report-level rows in `99_report/tables/optional_tool_summary.tsv` for CheckV, Pharokka, geNomad, Phold, and clinker. For example, Pharokka validation requires per-sample output directories plus GenBank and GFF files, while clinker validation checks the synteny HTML, GenBank input list, note file, and report summary row.
+The optional validator checks software-version records, expected files under `05_optional/`, and report-level rows in `99_report/tables/optional_tool_summary.tsv` for expected optional modules. For example, `lite` validation checks tRNAscan-SE, BACPHLIP, and ABRicate artifacts plus summary rows; Pharokka validation requires per-sample output directories plus GenBank and GFF files; clinker validation checks the synteny HTML, GenBank input list, note file, and report summary row.
 
 To validate only the report-level optional summary after manually inspecting or packaging a completed run:
 
@@ -132,7 +132,7 @@ bash bin/phageflow optional-summary \
   --summary-json results/my_run_optional_tool_summary.json
 ```
 
-This table summarizes CheckV, Pharokka, geNomad, Phold, and clinker artifact availability, primary artifact class, table row/column counts, file counts, sizes, and checksums. It intentionally does not print annotation values or make biological conclusions.
+This table summarizes tRNAscan-SE, BACPHLIP, ABRicate, CheckV, Pharokka, geNomad, Phold, and clinker artifact availability, primary artifact class, table row/column counts, file counts, sizes, and checksums. It intentionally does not print annotation values or make biological conclusions.
 
 ## Completed-Run Pangenome Sensitivity Summary
 

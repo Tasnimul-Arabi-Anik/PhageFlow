@@ -25,15 +25,21 @@ FIELDS = [
     "limitation",
 ]
 
-SAMPLE_TOOLS = ("checkv", "pharokka", "genomad", "phold")
+SAMPLE_TOOLS = ("trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold")
 TOOL_SUFFIXES = {
+    "trnascan": ".trnascan.tsv",
+    "bacphlip": ".bacphlip.log",
     "checkv": ".checkv",
+    "abricate": ".abricate.tsv",
     "pharokka": ".pharokka",
     "genomad": ".genomad",
     "phold": ".phold",
 }
 LIMITATIONS = {
+    "trnascan": "tRNAscan-SE artifact summary only; tRNA calls are not interpreted.",
+    "bacphlip": "BACPHLIP artifact summary only; lifecycle probabilities are not interpreted.",
     "checkv": "CheckV artifact summary only; quality/completeness fields are not interpreted.",
+    "abricate": "ABRicate artifact summary only; feature names and hits are not printed or interpreted.",
     "pharokka": "Pharokka artifact summary only; gene or function annotations are not printed or interpreted.",
     "genomad": "geNomad artifact summary only; classification and taxonomy values are not interpreted.",
     "phold": "Phold artifact summary only; structural annotation values are not printed or interpreted.",
@@ -100,6 +106,10 @@ def table_type(path: Path) -> str:
     suffix = path.suffix.lower()
     if "quality_summary" in name:
         return "quality_summary"
+    if "trnascan" in name and suffix in {".tsv", ".csv"}:
+        return "trna_table"
+    if "abricate" in name and suffix in {".tsv", ".csv"}:
+        return "screen_table"
     if "cds_functions" in name:
         return "cds_functions_table"
     if "summary" in name and suffix in {".tsv", ".csv"}:
@@ -132,6 +142,18 @@ def preferred_checkv_artifact(path: Path) -> Path | None:
     if candidate.exists():
         return candidate
     return first_file(path, ["*.tsv", "*.txt", "*.log"])
+
+
+def preferred_trnascan_artifact(path: Path) -> Path | None:
+    return first_file(path, ["*.trnascan.tsv", "*.tsv", "*.log"])
+
+
+def preferred_bacphlip_artifact(path: Path) -> Path | None:
+    return first_file(path, ["*.bacphlip.log", "*.log", "*.txt"])
+
+
+def preferred_abricate_artifact(path: Path) -> Path | None:
+    return first_file(path, ["*.abricate.tsv", "*.tsv", "*.csv", "*.log"])
 
 
 def preferred_pharokka_artifact(path: Path) -> Path | None:
@@ -176,8 +198,14 @@ def summarize_sample_tool(tool: str, sample_id: str, artifact: Path | None, inde
             "limitation": LIMITATIONS[tool],
         }
 
-    if tool == "checkv":
+    if tool == "trnascan":
+        primary = preferred_trnascan_artifact(artifact)
+    elif tool == "bacphlip":
+        primary = preferred_bacphlip_artifact(artifact)
+    elif tool == "checkv":
         primary = preferred_checkv_artifact(artifact)
+    elif tool == "abricate":
+        primary = preferred_abricate_artifact(artifact)
     elif tool == "pharokka":
         primary = preferred_pharokka_artifact(artifact)
     elif tool == "genomad":
@@ -235,6 +263,8 @@ def root_artifacts(root: Path, tool: str) -> list[Path]:
         return []
     if tool == "clinker":
         return sorted(path for path in optional_root.iterdir() if path.is_file())
+    if tool in {"trnascan", "bacphlip", "abricate"}:
+        return sorted(path for path in optional_root.glob(f"*{TOOL_SUFFIXES[tool]}"))
     return sorted(path for path in optional_root.glob(f"*{TOOL_SUFFIXES[tool]}"))
 
 
@@ -288,7 +318,10 @@ def first_file_from_list(paths: list[Path], suffixes: list[str]) -> Path | None:
 def collect_optional_rows(
     samplesheet: Path | None,
     root: Path | None,
+    trnascan_artifacts: list[Path],
+    bacphlip_artifacts: list[Path],
     checkv_artifacts: list[Path],
+    abricate_artifacts: list[Path],
     pharokka_artifacts: list[Path],
     genomad_artifacts: list[Path],
     genomad_logs: list[Path],
@@ -299,7 +332,10 @@ def collect_optional_rows(
     root = root.resolve() if root else None
     samples = read_samples(samplesheet, root)
     sample_artifacts = {
+        "trnascan": index_sample_artifacts(trnascan_artifacts or (root_artifacts(root, "trnascan") if root else []), "trnascan"),
+        "bacphlip": index_sample_artifacts(bacphlip_artifacts or (root_artifacts(root, "bacphlip") if root else []), "bacphlip"),
         "checkv": index_sample_artifacts(checkv_artifacts or (root_artifacts(root, "checkv") if root else []), "checkv"),
+        "abricate": index_sample_artifacts(abricate_artifacts or (root_artifacts(root, "abricate") if root else []), "abricate"),
         "pharokka": index_sample_artifacts(pharokka_artifacts or (root_artifacts(root, "pharokka") if root else []), "pharokka"),
         "genomad": index_sample_artifacts(genomad_artifacts or (root_artifacts(root, "genomad") if root else []), "genomad"),
         "phold": index_sample_artifacts(phold_artifacts or (root_artifacts(root, "phold") if root else []), "phold"),
@@ -356,7 +392,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Summarize optional-tool PhageFlow artifacts without printing annotation values.")
     parser.add_argument("--root", default=None, type=Path, help="Completed PhageFlow output directory.")
     parser.add_argument("--samplesheet", default=None, type=Path, help="Normalized samplesheet for expected sample IDs.")
+    parser.add_argument("--trnascan-artifact", action="append", default=[], type=Path)
+    parser.add_argument("--bacphlip-artifact", action="append", default=[], type=Path)
     parser.add_argument("--checkv-artifact", action="append", default=[], type=Path)
+    parser.add_argument("--abricate-artifact", action="append", default=[], type=Path)
     parser.add_argument("--pharokka-artifact", action="append", default=[], type=Path)
     parser.add_argument("--genomad-artifact", action="append", default=[], type=Path)
     parser.add_argument("--genomad-log", action="append", default=[], type=Path)
@@ -373,7 +412,10 @@ def main() -> int:
     rows = collect_optional_rows(
         samplesheet=args.samplesheet,
         root=args.root,
+        trnascan_artifacts=args.trnascan_artifact,
+        bacphlip_artifacts=args.bacphlip_artifact,
         checkv_artifacts=args.checkv_artifact,
+        abricate_artifacts=args.abricate_artifact,
         pharokka_artifacts=args.pharokka_artifact,
         genomad_artifacts=args.genomad_artifact,
         genomad_logs=args.genomad_log,
