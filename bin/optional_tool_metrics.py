@@ -16,6 +16,7 @@ from optional_tool_summary import (
     preferred_checkv_artifact,
     preferred_genomad_artifact,
     preferred_iphop_artifact,
+    preferred_phabox_artifact,
     preferred_pharokka_artifact,
     preferred_phold_artifact,
     preferred_trnascan_artifact,
@@ -36,7 +37,7 @@ FIELDS = [
     "limitation",
 ]
 
-SAMPLE_TOOLS = ("trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "iphop")
+SAMPLE_TOOLS = ("trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "iphop", "phabox")
 LIMITATIONS = {
     "trnascan": "tRNAscan-SE metric counts only; tRNA calls are not interpreted.",
     "bacphlip": "BACPHLIP metric counts only; lifecycle probabilities are not interpreted.",
@@ -46,6 +47,7 @@ LIMITATIONS = {
     "genomad": "geNomad metric counts only; classification and taxonomy values are not printed or interpreted.",
     "phold": "Phold metric counts only; structural annotation values are not printed or interpreted.",
     "iphop": "iPHoP metric counts only; host predictions are not interpreted as host-range evidence.",
+    "phabox": "PhaBOX/PhaBOX2 metric counts only; taxonomy, lifestyle, host, and annotation values are not printed or interpreted.",
     "clinker": "clinker metric counts only; gene-order visualization is not interpreted.",
 }
 
@@ -228,6 +230,22 @@ def metrics_for_tool(tool: str, sample_id: str, artifact: Path | None, log_path:
                 "prediction_fields_detected": ["host", "prediction"],
             },
         )
+    elif tool == "phabox":
+        table_metrics(
+            rows,
+            tool,
+            sample_id,
+            preferred_phabox_artifact(artifact) if artifact else None,
+            "phabox_records",
+            {
+                "taxonomy_fields_detected": ["taxonomy", "lineage", "taxon", "family", "genus"],
+                "host_prediction_fields_detected": ["host"],
+                "lifestyle_fields_detected": ["lifestyle", "temperate", "virulent"],
+                "score_fields_detected": ["score", "confidence", "probability"],
+                "contamination_fields_detected": ["contamination", "provirus"],
+                "annotation_fields_detected": ["annotation", "function", "protein"],
+            },
+        )
     return rows
 
 
@@ -245,6 +263,7 @@ def collect_optional_metric_rows(
     phold_logs: list[Path],
     iphop_artifacts: list[Path],
     iphop_logs: list[Path],
+    phabox_artifacts: list[Path],
     clinker_artifacts: list[Path],
 ) -> list[dict[str, str]]:
     root = root.resolve() if root else None
@@ -258,6 +277,7 @@ def collect_optional_metric_rows(
         "genomad": index_sample_artifacts(genomad_artifacts or (root_artifacts(root, "genomad") if root else []), "genomad"),
         "phold": index_sample_artifacts(phold_artifacts or (root_artifacts(root, "phold") if root else []), "phold"),
         "iphop": index_sample_artifacts(iphop_artifacts or (root_artifacts(root, "iphop") if root else []), "iphop"),
+        "phabox": index_sample_artifacts(phabox_artifacts or (root_artifacts(root, "phabox") if root else []), "phabox"),
     }
     log_artifacts = {
         "genomad": index_sample_artifacts(genomad_logs, "genomad"),
@@ -335,6 +355,7 @@ def main() -> int:
     parser.add_argument("--phold-log", action="append", default=[], type=Path)
     parser.add_argument("--iphop-artifact", action="append", default=[], type=Path)
     parser.add_argument("--iphop-log", action="append", default=[], type=Path)
+    parser.add_argument("--phabox-artifact", action="append", default=[], type=Path)
     parser.add_argument("--clinker-artifact", action="append", default=[], type=Path)
     parser.add_argument("--output", default=None, type=Path, help="Optional TSV output path. Defaults to stdout.")
     parser.add_argument("--summary-json", default=None, type=Path, help="Optional JSON summary output path.")
@@ -357,6 +378,7 @@ def main() -> int:
         phold_logs=args.phold_log,
         iphop_artifacts=args.iphop_artifact,
         iphop_logs=args.iphop_log,
+        phabox_artifacts=args.phabox_artifact,
         clinker_artifacts=args.clinker_artifact,
     )
     text = rows_to_tsv(rows)

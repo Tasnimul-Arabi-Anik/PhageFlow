@@ -41,6 +41,7 @@ def main() -> int:
             phold_logs=[],
             iphop_artifacts=[],
             iphop_logs=[],
+            phabox_artifacts=[],
             clinker_artifacts=[],
         )
     )
@@ -59,6 +60,7 @@ def main() -> int:
             phold_logs=[],
             iphop_artifacts=[],
             iphop_logs=[],
+            phabox_artifacts=[],
             clinker_artifacts=[],
         )
     )

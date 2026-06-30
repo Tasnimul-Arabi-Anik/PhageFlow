@@ -260,6 +260,7 @@ process OPTIONAL_TOOL_SUMMARY {
     path phold_logs
     path iphop_artifacts
     path iphop_logs
+    path phabox_artifacts
     path clinker_artifacts
 
     output:
@@ -280,6 +281,7 @@ process OPTIONAL_TOOL_SUMMARY {
     def pholdLogArgs = phold_logs.collect { "--phold-log ${it}" }.join(' ')
     def iphopArgs = iphop_artifacts.collect { "--iphop-artifact ${it}" }.join(' ')
     def iphopLogArgs = iphop_logs.collect { "--iphop-log ${it}" }.join(' ')
+    def phaboxArgs = phabox_artifacts.collect { "--phabox-artifact ${it}" }.join(' ')
     def clinkerArgs = clinker_artifacts.collect { "--clinker-artifact ${it}" }.join(' ')
     """
     python3 ${projectDir}/bin/optional_tool_summary.py \
@@ -295,6 +297,7 @@ process OPTIONAL_TOOL_SUMMARY {
         ${pholdLogArgs} \
         ${iphopArgs} \
         ${iphopLogArgs} \
+        ${phaboxArgs} \
         ${clinkerArgs} \
         --output optional_tool_summary.tsv \
         --summary-json optional_tool_summary.json
@@ -311,6 +314,7 @@ process OPTIONAL_TOOL_SUMMARY {
         ${pholdLogArgs} \
         ${iphopArgs} \
         ${iphopLogArgs} \
+        ${phaboxArgs} \
         ${clinkerArgs} \
         --output optional_tool_metrics.tsv \
         --summary-json optional_tool_metrics.json

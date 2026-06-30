@@ -25,7 +25,7 @@ FIELDS = [
     "limitation",
 ]
 
-SAMPLE_TOOLS = ("trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "iphop")
+SAMPLE_TOOLS = ("trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "iphop", "phabox")
 TOOL_SUFFIXES = {
     "trnascan": ".trnascan.tsv",
     "bacphlip": ".bacphlip.log",
@@ -35,6 +35,7 @@ TOOL_SUFFIXES = {
     "genomad": ".genomad",
     "phold": ".phold",
     "iphop": ".iphop",
+    "phabox": ".phabox",
 }
 LIMITATIONS = {
     "trnascan": "tRNAscan-SE artifact summary only; tRNA calls are not interpreted.",
@@ -45,6 +46,7 @@ LIMITATIONS = {
     "genomad": "geNomad artifact summary only; classification and taxonomy values are not interpreted.",
     "phold": "Phold artifact summary only; structural annotation values are not printed or interpreted.",
     "iphop": "iPHoP artifact summary only; host-prediction values are not interpreted as host-range evidence.",
+    "phabox": "PhaBOX/PhaBOX2 import summary only; taxonomy, lifestyle, host, and annotation values are not printed or interpreted.",
     "clinker": "clinker synteny artifact summary only; gene-order visualization is not interpreted.",
 }
 
@@ -188,6 +190,27 @@ def preferred_iphop_artifact(path: Path, log_path: Path | None = None) -> Path |
     return first_file(path, patterns) or log_path
 
 
+def preferred_phabox_artifact(path: Path) -> Path | None:
+    patterns = [
+        "**/*prediction*.tsv",
+        "**/*prediction*.csv",
+        "**/*summary*.tsv",
+        "**/*summary*.csv",
+        "**/*taxonomy*.tsv",
+        "**/*taxonomy*.csv",
+        "**/*host*.tsv",
+        "**/*host*.csv",
+        "**/*lifestyle*.tsv",
+        "**/*lifestyle*.csv",
+        "**/*contamination*.tsv",
+        "**/*provirus*.tsv",
+        "**/*.tsv",
+        "**/*.csv",
+        "**/*.log",
+    ]
+    return first_file(path, patterns)
+
+
 def first_file(path: Path, patterns: list[str]) -> Path | None:
     if path.is_file():
         return path
@@ -231,6 +254,8 @@ def summarize_sample_tool(tool: str, sample_id: str, artifact: Path | None, inde
         primary = preferred_phold_artifact(artifact, log_path)
     elif tool == "iphop":
         primary = preferred_iphop_artifact(artifact, log_path)
+    elif tool == "phabox":
+        primary = preferred_phabox_artifact(artifact)
     else:
         primary = first_file(artifact, ["*"])
 
@@ -348,6 +373,7 @@ def collect_optional_rows(
     phold_logs: list[Path],
     iphop_artifacts: list[Path],
     iphop_logs: list[Path],
+    phabox_artifacts: list[Path],
     clinker_artifacts: list[Path],
 ) -> list[dict[str, str]]:
     root = root.resolve() if root else None
@@ -361,6 +387,7 @@ def collect_optional_rows(
         "genomad": index_sample_artifacts(genomad_artifacts or (root_artifacts(root, "genomad") if root else []), "genomad"),
         "phold": index_sample_artifacts(phold_artifacts or (root_artifacts(root, "phold") if root else []), "phold"),
         "iphop": index_sample_artifacts(iphop_artifacts or (root_artifacts(root, "iphop") if root else []), "iphop"),
+        "phabox": index_sample_artifacts(phabox_artifacts or (root_artifacts(root, "phabox") if root else []), "phabox"),
     }
     log_artifacts = {
         "genomad": index_sample_artifacts(genomad_logs, "genomad"),
@@ -426,6 +453,7 @@ def main() -> int:
     parser.add_argument("--phold-log", action="append", default=[], type=Path)
     parser.add_argument("--iphop-artifact", action="append", default=[], type=Path)
     parser.add_argument("--iphop-log", action="append", default=[], type=Path)
+    parser.add_argument("--phabox-artifact", action="append", default=[], type=Path)
     parser.add_argument("--clinker-artifact", action="append", default=[], type=Path)
     parser.add_argument("--output", default=None, type=Path, help="Optional TSV output path. Defaults to stdout.")
     parser.add_argument("--summary-json", default=None, type=Path, help="Optional JSON summary output path.")
@@ -448,6 +476,7 @@ def main() -> int:
         phold_logs=args.phold_log,
         iphop_artifacts=args.iphop_artifact,
         iphop_logs=args.iphop_log,
+        phabox_artifacts=args.phabox_artifact,
         clinker_artifacts=args.clinker_artifact,
     )
     text = rows_to_tsv(rows)

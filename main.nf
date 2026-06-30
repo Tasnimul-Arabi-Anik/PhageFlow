@@ -205,6 +205,7 @@ workflow {
         iphop_artifacts_ch = Channel.value([])
         iphop_logs_ch = Channel.value([])
     }
+    phabox_artifacts_ch = Channel.value([])
 
     OPTIONAL_TOOL_SUMMARY(
         VALIDATE_SAMPLESHEET.out.samplesheet,
@@ -219,6 +220,7 @@ workflow {
         phold_logs_ch,
         iphop_artifacts_ch,
         iphop_logs_ch,
+        phabox_artifacts_ch,
         clinker_artifacts_ch
     )
 

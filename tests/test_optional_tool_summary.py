@@ -35,6 +35,7 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     genomad = tmp_path / "sample_a.genomad"
     phold = tmp_path / "sample_a.phold"
     iphop = tmp_path / "sample_a.iphop"
+    phabox = tmp_path / "sample_a.phabox"
     clinker = tmp_path / "clinker_synteny.html"
     gbk_files = tmp_path / "gbk_files.txt"
 
@@ -46,6 +47,7 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     write(genomad / "sample_a_summary.tsv", "seq_name\tlength\ncontig1\t1000\n")
     write(phold / "sample_a_confidence.tsv", "cds\tconfidence\ncds1\t0.9\n")
     write(iphop / "Host_prediction_to_genus_m90.csv", "Virus,Host genus,Score\ncontig1,host_a,95\n")
+    write(phabox / "phabox_prediction.tsv", "contig\ttaxonomy\thost\tlifestyle\tscore\ncontig1\tfamily_a\thost_a\ttemperate\t0.91\n")
     write(clinker, "<html><body>ok</body></html>\n")
     write(gbk_files, "sample_a.gbk\nsample_b.gbk\n")
 
@@ -72,6 +74,8 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
         str(phold),
         "--iphop-artifact",
         str(iphop),
+        "--phabox-artifact",
+        str(phabox),
         "--clinker-artifact",
         str(clinker),
         "--clinker-artifact",
@@ -93,7 +97,7 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     rows = list(csv.DictReader(output.open(), delimiter="\t"))
     by_tool_sample = {(row["tool"], row["sample_id"]): row for row in rows}
 
-    for tool in ["trnascan", "bacphlip", "abricate", "checkv", "pharokka", "genomad", "phold", "iphop"]:
+    for tool in ["trnascan", "bacphlip", "abricate", "checkv", "pharokka", "genomad", "phold", "iphop", "phabox"]:
         assert by_tool_sample[(tool, "sample_a")]["status"] == "available"
         assert by_tool_sample[(tool, "sample_b")]["status"] == "not_run"
 
@@ -110,12 +114,13 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
         "clinker",
         "genomad",
         "iphop",
+        "phabox",
         "pharokka",
         "phold",
         "trnascan",
     ]
-    assert summary["status_counts"]["available"] == 9
-    assert summary["status_counts"]["not_run"] == 8
+    assert summary["status_counts"]["available"] == 10
+    assert summary["status_counts"]["not_run"] == 9
 
     subprocess.run(
         [
@@ -136,6 +141,7 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     assert metric_index[("genomad", "sample_a", "classification_records")]["value"] == "1"
     assert metric_index[("phold", "sample_a", "structural_annotation_records")]["value"] == "1"
     assert metric_index[("iphop", "sample_a", "host_prediction_records")]["value"] == "1"
+    assert metric_index[("phabox", "sample_a", "phabox_records")]["value"] == "1"
     assert metric_index[("clinker", "COHORT", "genbank_inputs_listed")]["value"] == "2"
     metrics_summary = json.loads(metrics_json.read_text())
     assert metrics_summary["available_metric_rows"] > 0
@@ -166,7 +172,9 @@ def run_completed_utility_regression(tmp_path: Path) -> None:
     )
     summary = json.loads(summary_json.read_text())
     assert summary["optional_tool_summary"]["tool_counts"]["iphop"] == 1
+    assert summary["optional_tool_summary"]["tool_counts"]["phabox"] == 1
     assert summary["optional_tool_metrics_summary"]["tool_counts"]["iphop"] == 1
+    assert summary["optional_tool_metrics_summary"]["tool_counts"]["phabox"] == 1
 
     subprocess.run(
         [

@@ -58,6 +58,7 @@ def main() -> int:
         phold_logs=[],
         iphop_artifacts=[],
         iphop_logs=[],
+        phabox_artifacts=[],
         clinker_artifacts=[],
     )
     optional_metric_rows = collect_optional_metric_rows(
@@ -74,6 +75,7 @@ def main() -> int:
         phold_logs=[],
         iphop_artifacts=[],
         iphop_logs=[],
+        phabox_artifacts=[],
         clinker_artifacts=[],
     )
     sensitivity_rows = read_comparison_rows(root / "99_report" / "tables" / "pangenome_sensitivity.tsv")

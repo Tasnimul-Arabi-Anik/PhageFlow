@@ -288,14 +288,14 @@ Outputs are written under `--outdir`:
 - `04_comparative/marker_phylogeny/`: marker protein selection, alignments, Newick trees, topology consistency table, provenance table, and method note when enabled.
 - `04_comparative/mmseqs_pangenome/`: default pangenome outputs.
 - `04_comparative/rbh_blastp_pangenome/`: conservative RBH pangenome outputs.
-- `05_optional/`: tRNAscan-SE, BACPHLIP, CheckV, ABRicate, Pharokka, geNomad, Phold, clinker, and iPHoP outputs when enabled.
+- `05_optional/`: tRNAscan-SE, BACPHLIP, CheckV, ABRicate, Pharokka, geNomad, Phold, clinker, and iPHoP outputs when enabled; PhaBOX/PhaBOX2 outputs can be summarized when imported or copied into `05_optional/phabox/`.
 - `06_host_context/`: host-linked nucleotide composition comparison.
 - `99_report/index.html`: HTML dashboard.
 - `99_report/figures/`: PNG, TIFF, PDF, and SVG figures.
 - `99_report/tables/`: key downloadable TSV files.
 - `99_report/tables/claim_evidence_matrix.tsv`: software claim-to-artifact evidence matrix with limitations.
 - `99_report/tables/marker_provenance.tsv`: marker alignment/tree provenance table when marker-tree outputs are enabled.
-- `99_report/tables/optional_tool_summary.tsv`: optional tRNAscan-SE/BACPHLIP/ABRicate/CheckV/Pharokka/geNomad/Phold/clinker/iPHoP artifact status, table shapes, sizes, and checksums.
+- `99_report/tables/optional_tool_summary.tsv`: optional tRNAscan-SE/BACPHLIP/ABRicate/CheckV/Pharokka/geNomad/Phold/clinker/iPHoP/PhaBOX artifact status, table shapes, sizes, and checksums.
 - `99_report/tables/optional_tool_metrics.tsv`: compact optional-tool metric counts from stable high-level outputs without printing annotation, taxonomy, host-prediction, or feature values.
 - `99_report/important_files.tsv`: important output manifest.
 - `99_report/validation_manifest.json`: report-level QA manifest.

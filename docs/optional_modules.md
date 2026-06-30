@@ -143,7 +143,25 @@ bash bin/phageflow optional-summary \
   --summary-json results/my_run_optional_tool_summary.json
 ```
 
-This table summarizes tRNAscan-SE, BACPHLIP, ABRicate, CheckV, Pharokka, geNomad, Phold, clinker, and iPHoP artifact availability, primary artifact class, table row/column counts, file counts, sizes, and checksums. It intentionally does not print annotation values, host-prediction values, or make biological conclusions.
+This table summarizes tRNAscan-SE, BACPHLIP, ABRicate, CheckV, Pharokka, geNomad, Phold, clinker, iPHoP, and imported PhaBOX/PhaBOX2 artifact availability, primary artifact class, table row/column counts, file counts, sizes, and checksums. It intentionally does not print annotation values, host-prediction values, or make biological conclusions.
+
+## Imported PhaBOX/PhaBOX2 Artifacts
+
+PhageFlow does not run PhaBOX/PhaBOX2 yet. To include completed PhaBOX/PhaBOX2 outputs in the conservative optional summary layer, pass the output directory explicitly:
+
+```bash
+bash bin/phageflow optional-summary \
+  --root results/my_run \
+  --phabox-artifact results/my_run/05_optional/phabox/sample_a.phabox \
+  --output results/my_run_phabox_optional_summary.tsv
+
+bash bin/phageflow optional-metrics \
+  --root results/my_run \
+  --phabox-artifact results/my_run/05_optional/phabox/sample_a.phabox \
+  --output results/my_run_phabox_optional_metrics.tsv
+```
+
+If a completed run contains directories named like `05_optional/phabox/<sample_id>.phabox`, the completed-run summary/package helpers also detect them. PhaBOX/PhaBOX2 rows are artifact/metric counts only; taxonomy, lifestyle, host-prediction, and annotation values are not printed or interpreted.
 
 ## Optional Tool Metric Summary
 
