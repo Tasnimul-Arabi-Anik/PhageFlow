@@ -28,6 +28,9 @@ REQUIRED_TABLES = [
     "intergenomic_similarity_pairs.tsv",
     "intergenomic_similarity_matrix.tsv",
     "intergenomic_distance_matrix.tsv",
+    "reference_context_summary.tsv",
+    "reference_context_pairs.tsv",
+    "reference_context_nearest.tsv",
     "marker_tree_summary.tsv",
     "marker_presence.tsv",
     "marker_topology_consistency.tsv",
@@ -350,6 +353,28 @@ def check_crispr_hits(results: list[dict[str, str]], tables_dir: Path) -> bool:
     return bool(ok)
 
 
+def check_reference_context(results: list[dict[str, str]], tables_dir: Path) -> bool:
+    ok = True
+    summary_path = tables_dir / "reference_context_summary.tsv"
+    summary = read_key_value(summary_path)
+    status = summary.get("status", "")
+    status_ok = status == "completed"
+    results.append(
+        {
+            "check": "reference_context_completed",
+            "path": str(summary_path),
+            "exists": "true" if summary_path.exists() else "false",
+            "nonempty": "true" if row_count(summary_path) > 0 else "false",
+            "status": "PASS" if status_ok else "FAIL",
+            "value": f"status={status}",
+        }
+    )
+    ok &= status_ok
+    ok &= check_min_count(results, "reference_context_pair_rows", tables_dir / "reference_context_pairs.tsv", 1)
+    ok &= check_min_count(results, "reference_context_nearest_rows", tables_dir / "reference_context_nearest.tsv", 1)
+    return bool(ok)
+
+
 def check_marker_tree(results: list[dict[str, str]], outdir: Path, tables_dir: Path, figures_dir: Path) -> bool:
     ok = True
     summary_path = tables_dir / "marker_tree_summary.tsv"
@@ -390,6 +415,7 @@ def main() -> int:
     parser.add_argument("--report", default=None, type=Path, help="Optional path for validation report TSV.")
     parser.add_argument("--min-figures", default=2, type=int)
     parser.add_argument("--require-pangenome-rows", action="store_true")
+    parser.add_argument("--expect-reference-context", action="store_true", help="Require completed local query/reference context outputs.")
     parser.add_argument("--expect-marker-tree", action="store_true", help="Require completed marker-gene phylogeny outputs and TIFF tree figures.")
     parser.add_argument("--expect-host-adaptation", action="store_true", help="Require nonempty host codon-adaptation/RSCU outputs and host-adaptation TIFF figure.")
     parser.add_argument("--expect-crispr-hits", action="store_true", help="Require at least one CRISPR spacer/protospacer match row.")
@@ -416,7 +442,7 @@ def main() -> int:
 
     for name in REQUIRED_REPORT_FILES:
         ok &= check_file(results, f"report_file:{name}", report_dir / name)
-    optional_empty_tables = {"host_context.tsv", "host_codon_adaptation.tsv", "host_codon_rscu.tsv", "crispr_spacer_matches.tsv", "presence_absence.tsv", "cohort_pairwise_similarity.tsv", "intergenomic_similarity_pairs.tsv", "marker_presence.tsv", "marker_topology_consistency.tsv"}
+    optional_empty_tables = {"host_context.tsv", "host_codon_adaptation.tsv", "host_codon_rscu.tsv", "crispr_spacer_matches.tsv", "presence_absence.tsv", "cohort_pairwise_similarity.tsv", "intergenomic_similarity_pairs.tsv", "reference_context_pairs.tsv", "reference_context_nearest.tsv", "marker_presence.tsv", "marker_topology_consistency.tsv"}
     for name in REQUIRED_TABLES:
         required_rows = 0 if name in optional_empty_tables else 1
         ok &= check_min_count(results, f"report_table:{name}", tables_dir / name, required_rows)
@@ -447,6 +473,9 @@ def main() -> int:
 
     if args.expect_crispr_hits:
         ok &= check_crispr_hits(results, tables_dir)
+
+    if args.expect_reference_context:
+        ok &= check_reference_context(results, tables_dir)
 
     if args.require_pangenome_rows:
         pangenome_rows = row_count(tables_dir / "presence_absence.tsv")

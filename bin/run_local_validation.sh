@@ -7,9 +7,9 @@ cd "${PROJECT_ROOT}"
 
 python3 -m py_compile phageflow/bin/*.py
 nextflow run phageflow/main.nf -profile test --pangenome_method mmseqs --outdir phageflow_validation_mmseqs
-python3 phageflow/bin/validate_phageflow_run.py --outdir phageflow_validation_mmseqs --require-pangenome-rows
+python3 phageflow/bin/validate_phageflow_run.py --outdir phageflow_validation_mmseqs --require-pangenome-rows --expect-reference-context
 nextflow run phageflow/main.nf -profile test --pangenome_method rbh_blastp --outdir phageflow_validation_rbh
-python3 phageflow/bin/validate_phageflow_run.py --outdir phageflow_validation_rbh --require-pangenome-rows
+python3 phageflow/bin/validate_phageflow_run.py --outdir phageflow_validation_rbh --require-pangenome-rows --expect-reference-context
 nextflow run phageflow/main.nf --input phageflow/assets/test_data/toy_phage_a.fasta --pangenome_method none --outdir phageflow_validation_single
 python3 phageflow/bin/validate_phageflow_run.py --outdir phageflow_validation_single
 nextflow run phageflow/main.nf --input phageflow/assets/test_data/marker_tree_samplesheet.tsv --pangenome_method none --run_marker_tree true --marker_faa phageflow/assets/test_data/toy_marker_proteins.faa --marker_source marker_faa --marker_tree_engine simple --marker_bootstrap 0 --outdir phageflow_validation_marker_tree

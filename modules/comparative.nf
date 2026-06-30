@@ -85,6 +85,36 @@ process INTERGENOMIC_SIMILARITY {
     """
 }
 
+process REFERENCE_CONTEXT {
+    tag "reference_context"
+    publishDir "${params.outdir}/04_comparative/reference_context", mode: 'copy'
+
+    input:
+    path samplesheet
+    path cohort_pairwise
+    path intergenomic_pairs
+    path intergenomic_summary
+
+    output:
+    path "reference_context_summary.tsv", emit: summary
+    path "reference_context_pairs.tsv", emit: pairs
+    path "reference_context_nearest.tsv", emit: nearest
+    path "reference_context_note.md", emit: note
+
+    script:
+    """
+    python3 ${projectDir}/bin/reference_context.py \
+        --samplesheet "${samplesheet}" \
+        --cohort-pairwise "${cohort_pairwise}" \
+        --intergenomic-pairs "${intergenomic_pairs}" \
+        --intergenomic-summary "${intergenomic_summary}" \
+        --summary reference_context_summary.tsv \
+        --pairs reference_context_pairs.tsv \
+        --nearest reference_context_nearest.tsv \
+        --note reference_context_note.md
+    """
+}
+
 process NO_INTERGENOMIC_SIMILARITY {
     tag "no_intergenomic_similarity"
     publishDir "${params.outdir}/04_comparative/intergenomic_similarity", mode: 'copy'

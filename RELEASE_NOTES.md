@@ -51,3 +51,9 @@ v0.3 priority-1 increment:
 - Added optional-summary integration to `summarize` and `package`.
 - Extended validator coverage so expected CheckV/Pharokka/geNomad/Phold/clinker modules also require report-level optional summary rows; added `--expect-*-summary` flags for report-only checks.
 - Reviewed Clinker static export feasibility and kept native HTML/alignment artifacts as the validated contract; automated SVG/PNG/PDF export remains deferred until a stable upstream CLI or separate browser-rendering contract is available.
+
+v0.3 priority-2 increment:
+
+- Added local reference-context reporting for samplesheets that mark rows as `role=reference`.
+- Added nearest-reference and all query/reference metric tables, report integration, claim-evidence rows, runtime/validation manifest counters, and method limitations.
+- Added validator support with `--expect-reference-context` and wired the bundled cohort validation runs to require it.

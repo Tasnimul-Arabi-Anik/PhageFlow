@@ -100,6 +100,10 @@ process BUILD_REPORT {
     path intergenomic_similarity_matrix
     path intergenomic_distance_matrix
     path intergenomic_note
+    path reference_context_summary
+    path reference_context_pairs
+    path reference_context_nearest
+    path reference_context_note
     path marker_summary
     path marker_presence
     path marker_topology
@@ -145,6 +149,10 @@ process BUILD_REPORT {
         --intergenomic-similarity-matrix "${intergenomic_similarity_matrix}" \
         --intergenomic-distance-matrix "${intergenomic_distance_matrix}" \
         --intergenomic-note "${intergenomic_note}" \
+        --reference-context-summary "${reference_context_summary}" \
+        --reference-context-pairs "${reference_context_pairs}" \
+        --reference-context-nearest "${reference_context_nearest}" \
+        --reference-context-note "${reference_context_note}" \
         --marker-summary "${marker_summary}" \
         --marker-presence "${marker_presence}" \
         --marker-topology "${marker_topology}" \

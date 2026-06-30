@@ -146,7 +146,8 @@ Validate the output:
 ```bash
 bash phageflow/bin/phageflow validate \
   --outdir beginner_cohort_host_results \
-  --require-pangenome-rows
+  --require-pangenome-rows \
+  --expect-reference-context
 ```
 
 Summarize or package the completed cohort run:
@@ -240,6 +241,8 @@ my_phage	/path/to/my_phage.fasta	query	host_1
 ref_phage_1	/path/to/ref_phage_1.fasta	reference
 ref_phage_2	/path/to/ref_phage_2.fasta	reference
 ```
+
+Rows marked `reference` form a local comparison panel. New reports include `reference_context_summary.tsv`, `reference_context_pairs.tsv`, and `reference_context_nearest.tsv` under `99_report/tables/`; these are nearest-reference software metrics, not public taxonomy assignments.
 
 Then run:
 

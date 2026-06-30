@@ -20,6 +20,7 @@ if [[ -n "${PHAGEFLOW_CONTAINER_OUTDIR:-}" ]]; then
   rm -rf "${OUTDIR}"
 fi
 mkdir -p "${OUTDIR}"
+mkdir -p "${OUTDIR}/work"
 
 docker run --rm \
   --user "$(id -u):$(id -g)" \
@@ -29,6 +30,7 @@ docker run --rm \
   -w /work \
   "${IMAGE}" \
   nextflow run phageflow/main.nf \
+    -work-dir /out/work \
     --input phageflow/assets/test_data/toy_phage_a.fasta \
     --pangenome_method none \
     --outdir /out/results

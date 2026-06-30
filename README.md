@@ -119,6 +119,8 @@ Required columns: `sample_id`, `fasta`.
 
 Optional columns: `role`, `host_id`, `accession`.
 
+Rows with `role=reference` are treated as a local reference panel. PhageFlow compares non-reference rows against those local references and reports nearest-reference metrics, duplicate flags, and method limitations in `99_report/tables/reference_context_*.tsv`. This is local context only; it is not live public database discovery or taxonomy assignment.
+
 Optional host samplesheet:
 
 ```text
@@ -144,7 +146,7 @@ Bundled validation test with native MMseqs pangenome:
 
 ```bash
 nextflow run phageflow/main.nf -profile test
-python3 phageflow/bin/validate_phageflow_run.py --outdir phageflow_test_results --require-pangenome-rows
+python3 phageflow/bin/validate_phageflow_run.py --outdir phageflow_test_results --require-pangenome-rows --expect-reference-context
 ```
 
 Single phage:
@@ -298,7 +300,8 @@ Or validate an existing run:
 ```bash
 python3 phageflow/bin/validate_phageflow_run.py \
   --outdir phageflow_validation_mmseqs \
-  --require-pangenome-rows
+  --require-pangenome-rows \
+  --expect-reference-context
 ```
 
 Validate expected optional outputs rigorously after an optional run:
@@ -311,7 +314,7 @@ python3 phageflow/bin/validate_phageflow_run.py \
   --expect-phold
 ```
 
-The validator checks the dashboard, manifests, report tables, figure counts, TIFF outputs, BLASTN intergenomic similarity tables, marker-tree tables when present, pangenome presence/absence rows, and any optional modules explicitly requested with `--expect-optional`, `--expect-lite-optionals`, `--expect-publication-optionals`, or per-module flags such as `--expect-pharokka`; marker-tree runs can be checked with `--expect-marker-tree`. For optional CheckV/Pharokka/geNomad/Phold/clinker modules, expected-module validation also checks `99_report/tables/optional_tool_summary.tsv`.
+The validator checks the dashboard, manifests, report tables, figure counts, TIFF outputs, BLASTN intergenomic similarity tables, local reference-context tables when requested with `--expect-reference-context`, marker-tree tables when present, pangenome presence/absence rows, and any optional modules explicitly requested with `--expect-optional`, `--expect-lite-optionals`, `--expect-publication-optionals`, or per-module flags such as `--expect-pharokka`; marker-tree runs can be checked with `--expect-marker-tree`. For optional CheckV/Pharokka/geNomad/Phold/clinker modules, expected-module validation also checks `99_report/tables/optional_tool_summary.tsv`.
 
 Completed-run utilities:
 

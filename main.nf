@@ -1,7 +1,7 @@
 nextflow.enable.dsl = 2
 
 include { VALIDATE_SAMPLESHEET; FASTA_STATS; SIMPLE_ORF_PREDICT; CODON_USAGE; BUILD_REPORT } from './modules/core'
-include { COHORT_SIMILARITY; INTERGENOMIC_SIMILARITY; NO_INTERGENOMIC_SIMILARITY; MARKER_PHYLOGENY; NO_MARKER_PHYLOGENY; MMSEQS_PANGENOME; RBH_PANGENOME; NO_PANGENOME; RUN_LEGACY_SNAKEMAKE_PANGENOME } from './modules/comparative'
+include { COHORT_SIMILARITY; INTERGENOMIC_SIMILARITY; NO_INTERGENOMIC_SIMILARITY; REFERENCE_CONTEXT; MARKER_PHYLOGENY; NO_MARKER_PHYLOGENY; MMSEQS_PANGENOME; RBH_PANGENOME; NO_PANGENOME; RUN_LEGACY_SNAKEMAKE_PANGENOME } from './modules/comparative'
 include { TRNASCAN; BACPHLIP; CHECKV; ABRICATE; PHAROKKA; GENOMAD; PHOLD; CLINKER_SYNTENY; OPTIONAL_TOOL_SUMMARY } from './modules/optional_tools'
 include { HOST_CONTEXT_LIGHT; NO_HOST_CONTEXT } from './modules/host'
 
@@ -81,6 +81,13 @@ workflow {
         intergenomic_distance_matrix_ch = NO_INTERGENOMIC_SIMILARITY.out.distance_matrix
         intergenomic_note_ch = NO_INTERGENOMIC_SIMILARITY.out.note
     }
+
+    REFERENCE_CONTEXT(
+        VALIDATE_SAMPLESHEET.out.samplesheet,
+        COHORT_SIMILARITY.out.pairwise,
+        intergenomic_pairs_ch,
+        intergenomic_summary_ch
+    )
 
     faa_collect_ch = SIMPLE_ORF_PREDICT.out.faa.map { sample_id, faa -> faa }.collect()
 
@@ -230,6 +237,10 @@ workflow {
         intergenomic_similarity_matrix_ch,
         intergenomic_distance_matrix_ch,
         intergenomic_note_ch,
+        REFERENCE_CONTEXT.out.summary,
+        REFERENCE_CONTEXT.out.pairs,
+        REFERENCE_CONTEXT.out.nearest,
+        REFERENCE_CONTEXT.out.note,
         marker_summary_ch,
         marker_presence_ch,
         marker_topology_ch,

@@ -479,6 +479,9 @@ def claim_evidence_rows(
     codon_rows: list[dict[str, str]],
     pairwise_rows: list[dict[str, str]],
     intergenomic_pair_rows: list[dict[str, str]],
+    reference_summary: dict[str, str],
+    reference_pair_rows: list[dict[str, str]],
+    reference_nearest_rows: list[dict[str, str]],
     marker_presence_rows: list[dict[str, str]],
     marker_provenance_rows: list[dict[str, str]],
     presence_rows: list[dict[str, str]],
@@ -504,6 +507,7 @@ def claim_evidence_rows(
     host_links = sum(1 for item in host_rows if item.get("host_found") == "true")
     termini_available = bool(fasta_rows) and all("termini_heuristic" in item for item in fasta_rows)
     optional_available = sum(1 for item in optional_summary_rows if item.get("status") == "available")
+    reference_status = reference_summary.get("status", "not_available")
     return [
         row("input_validation", "software_validation", "PASS" if validation.get("genomes") else "WARN", "tables/validation_summary.tsv", "Validates input contract only."),
         row("genome_qc", "software_artifact", "PASS" if fasta_rows else "FAIL", "tables/fasta_stats_combined.tsv", "FASTA-derived assembly statistics only."),
@@ -512,6 +516,8 @@ def claim_evidence_rows(
         row("codon_summary", "software_artifact", "PASS" if codon_rows else "FAIL", "tables/codon_summary_combined.tsv", "Descriptive coding-sequence composition only."),
         row("cohort_similarity", "software_artifact", "PASS" if cohort_summary or pairwise_rows else "WARN", "tables/cohort_similarity_summary.tsv", "Detects redundancy and k-mer similarity; not taxonomy."),
         row("intergenomic_similarity", "software_artifact", "PASS" if intergenomic_status in {"completed", "single_genome_skipped"} else "WARN", "tables/intergenomic_similarity_summary.tsv", "BLASTN-derived similarity summary; thresholds are workflow parameters."),
+        row("local_reference_context", "software_artifact", "PASS" if reference_status in {"completed", "skipped_no_references", "skipped_no_queries"} else "WARN", "tables/reference_context_summary.tsv", "Local user-supplied reference context only; not taxonomy or biological classification."),
+        row("nearest_local_reference", "software_artifact", "PASS" if reference_nearest_rows or reference_status.startswith("skipped_") else "WARN", "tables/reference_context_nearest.tsv", f"Nearest-reference rows: {len(reference_nearest_rows)}."),
         row("marker_phylogeny", "software_artifact", "PASS" if marker_status == "completed" else "WARN", "tables/marker_tree_summary.tsv", "Marker trees require suitable markers and are not standalone classification."),
         row("marker_presence", "software_artifact", "PASS" if marker_presence_rows else "WARN", "tables/marker_presence.tsv", "Marker selection provenance only."),
         row("marker_provenance", "software_artifact", "PASS" if marker_provenance_rows or marker_status == "skipped" else "WARN", "tables/marker_provenance.tsv", "Alignment/tree provenance only; not biological classification."),
@@ -524,7 +530,7 @@ def claim_evidence_rows(
     ]
 
 
-def build_html(args, validation, cohort_summary, intergenomic_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_rows, host_adaptation_rows, crispr_match_rows, crispr_summary, intergenomic_pair_rows, marker_presence_rows, marker_topology_rows, marker_provenance_rows, optional_summary_rows, claim_rows, figure_paths, important_files) -> str:
+def build_html(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_rows, host_adaptation_rows, crispr_match_rows, crispr_summary, intergenomic_pair_rows, reference_pair_rows, reference_nearest_rows, marker_presence_rows, marker_topology_rows, marker_provenance_rows, optional_summary_rows, claim_rows, figure_paths, important_files) -> str:
     genomes = validation.get("genomes", str(len(fasta_rows)))
     orthogroups = pangenome_summary.get("orthogroups", "0")
     exact_dups = cohort_summary.get("exact_duplicate_pairs", "0")
@@ -532,6 +538,8 @@ def build_html(args, validation, cohort_summary, intergenomic_summary, marker_su
     max_intergenomic = intergenomic_summary.get("max_similarity_score_pct", "NA")
     marker_status = marker_summary.get("status", "not_available")
     markers_built = marker_summary.get("markers_built", "0")
+    references = reference_summary.get("references", "0")
+    nearest_refs = reference_summary.get("nearest_reference_rows", str(len(reference_nearest_rows)))
     host_links = sum(1 for row in host_rows if row.get("host_found") == "true")
     crispr_hits = crispr_summary.get("spacer_matches", str(len(crispr_match_rows)))
     optional_available = sum(1 for row in optional_summary_rows if row.get("status") == "available")
@@ -544,6 +552,8 @@ def build_html(args, validation, cohort_summary, intergenomic_summary, marker_su
         warnings.append("Deprecated Snakemake backend selected for parity only; native report uses skipped pangenome tables.")
     if intergenomic_status not in {"completed", "single_genome_skipped"}:
         warnings.append(f"Intergenomic similarity status: {intergenomic_status}.")
+    if reference_summary.get("status") != "completed":
+        warnings.append(f"Local reference context status: {reference_summary.get('status', 'not_available')}.")
     if marker_status not in {"completed", "skipped", "skipped_no_trees_built"}:
         warnings.append(f"Marker phylogeny status: {marker_status}.")
     if not warnings:
@@ -605,6 +615,8 @@ footer {{ color:var(--muted); padding:20px 6vw 40px; font-size:.9rem; }}
     <div class="card"><div class="metric">{html.escape(str(orthogroups))}</div><div class="label">orthogroups</div></div>
     <div class="card"><div class="metric">{html.escape(str(exact_dups))}</div><div class="label">exact duplicate pairs</div></div>
     <div class="card"><div class="metric">{html.escape(str(max_intergenomic))}</div><div class="label">max BLASTN similarity score (%)</div></div>
+    <div class="card"><div class="metric">{html.escape(str(references))}</div><div class="label">local references</div></div>
+    <div class="card"><div class="metric">{html.escape(str(nearest_refs))}</div><div class="label">nearest-reference rows</div></div>
     <div class="card"><div class="metric">{html.escape(str(markers_built))}</div><div class="label">marker trees built</div></div>
     <div class="card"><div class="metric">{html.escape(str(host_links))}</div><div class="label">host links evaluated</div></div>
     <div class="card"><div class="metric">{html.escape(str(crispr_hits))}</div><div class="label">CRISPR spacer matches</div></div>
@@ -615,6 +627,7 @@ footer {{ color:var(--muted); padding:20px 6vw 40px; font-size:.9rem; }}
   <section><h2>Key Figures</h2><div class="figure-grid">{''.join(figure_cards) or '<p class="muted">No figures were generated.</p>'}</div></section>
   <section><h2>Genome QC</h2>{html_table(fasta_rows)}</section>
   <section><h2>Intergenomic Similarity</h2>{html_table([intergenomic_summary])}{html_table(intergenomic_pair_rows)}</section>
+  <section><h2>Local Reference Context</h2>{html_table([reference_summary])}{html_table(reference_nearest_rows)}{html_table(reference_pair_rows)}</section>
   <section><h2>Marker-Gene Phylogeny</h2>{html_table([marker_summary])}{html_table(marker_presence_rows)}{html_table(marker_topology_rows)}{html_table(marker_provenance_rows)}</section>
   <section><h2>Pangenome Summary</h2>{html_table([pangenome_summary])}</section>
   <section><h2>Codon Summary</h2>{html_table(codon_rows)}</section>
@@ -630,7 +643,7 @@ footer {{ color:var(--muted); padding:20px 6vw 40px; font-size:.9rem; }}
 '''
 
 
-def build_markdown(args, validation, cohort_summary, intergenomic_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_adaptation_rows, crispr_match_rows, intergenomic_pair_rows, marker_topology_rows, optional_summary_rows) -> str:
+def build_markdown(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_adaptation_rows, crispr_match_rows, intergenomic_pair_rows, reference_nearest_rows, marker_topology_rows, optional_summary_rows) -> str:
     lines = ["# PhageFlow Report", ""]
     lines.append(f"- Genomes analyzed: {validation.get('genomes', len(fasta_rows))}")
     lines.append(f"- Pangenome method: `{args.pangenome_method}`")
@@ -638,6 +651,9 @@ def build_markdown(args, validation, cohort_summary, intergenomic_summary, marke
     lines.append(f"- Pairwise comparisons: {cohort_summary.get('pairwise_comparisons', 'NA')}")
     lines.append(f"- Intergenomic similarity status: {intergenomic_summary.get('status', 'NA')}")
     lines.append(f"- Max BLASTN similarity score (%): {intergenomic_summary.get('max_similarity_score_pct', 'NA')}")
+    lines.append(f"- Local reference context status: {reference_summary.get('status', 'NA')}")
+    lines.append(f"- Local references: {reference_summary.get('references', '0')}")
+    lines.append(f"- Nearest-reference rows: {len(reference_nearest_rows)}")
     lines.append(f"- Marker phylogeny status: {marker_summary.get('status', 'NA')}")
     lines.append(f"- Marker trees built: {marker_summary.get('markers_built', '0')}")
     lines.append(f"- Orthogroups: {pangenome_summary.get('orthogroups', 'NA')}")
@@ -659,6 +675,17 @@ def build_markdown(args, validation, cohort_summary, intergenomic_summary, marke
             lines.append("| " + " | ".join(str(row.get(col, "")) for col in cols) + " |")
     else:
         lines.append("No pairwise intergenomic rows were generated, usually because only one genome was supplied or the module was disabled.")
+    lines.append("")
+    lines.append("## Local Reference Context")
+    lines.append("")
+    if reference_nearest_rows:
+        cols = ["query_id", "nearest_reference_id", "rank", "kmer_jaccard", "blastn_similarity_score_pct", "duplicate_flag", "ranking_metric"]
+        lines.append("| " + " | ".join(cols) + " |")
+        lines.append("| " + " | ".join(["---"] * len(cols)) + " |")
+        for row in reference_nearest_rows:
+            lines.append("| " + " | ".join(str(row.get(col, "")) for col in cols) + " |")
+    else:
+        lines.append(f"No nearest-reference rows were generated. Status: `{reference_summary.get('status', 'not_available')}`.")
     lines.append("")
     lines.append("## Marker-Gene Phylogeny")
     lines.append("")
@@ -728,6 +755,10 @@ def main() -> int:
     parser.add_argument("--intergenomic-similarity-matrix", required=True, type=Path)
     parser.add_argument("--intergenomic-distance-matrix", required=True, type=Path)
     parser.add_argument("--intergenomic-note", required=True, type=Path)
+    parser.add_argument("--reference-context-summary", required=True, type=Path)
+    parser.add_argument("--reference-context-pairs", required=True, type=Path)
+    parser.add_argument("--reference-context-nearest", required=True, type=Path)
+    parser.add_argument("--reference-context-note", required=True, type=Path)
     parser.add_argument("--marker-summary", required=True, type=Path)
     parser.add_argument("--marker-presence", required=True, type=Path)
     parser.add_argument("--marker-topology", required=True, type=Path)
@@ -791,6 +822,9 @@ def main() -> int:
     pairwise_rows = read_rows(args.cohort_pairwise)
     intergenomic_pair_rows = read_rows(args.intergenomic_pairs)
     intergenomic_matrix_rows = read_rows(args.intergenomic_similarity_matrix)
+    reference_summary = read_key_value(args.reference_context_summary)
+    reference_pair_rows = read_rows(args.reference_context_pairs)
+    reference_nearest_rows = read_rows(args.reference_context_nearest)
     marker_presence_rows = read_rows(args.marker_presence)
     marker_topology_rows = read_rows(args.marker_topology)
     marker_provenance_rows = read_rows(args.marker_provenance)
@@ -815,6 +849,10 @@ def main() -> int:
     shutil.copyfile(args.intergenomic_similarity_matrix, tables_dir / "intergenomic_similarity_matrix.tsv")
     shutil.copyfile(args.intergenomic_distance_matrix, tables_dir / "intergenomic_distance_matrix.tsv")
     shutil.copyfile(args.intergenomic_note, tables_dir / "intergenomic_similarity_note.md")
+    shutil.copyfile(args.reference_context_summary, tables_dir / "reference_context_summary.tsv")
+    shutil.copyfile(args.reference_context_pairs, tables_dir / "reference_context_pairs.tsv")
+    shutil.copyfile(args.reference_context_nearest, tables_dir / "reference_context_nearest.tsv")
+    shutil.copyfile(args.reference_context_note, tables_dir / "reference_context_note.md")
     shutil.copyfile(args.marker_summary, tables_dir / "marker_tree_summary.tsv")
     shutil.copyfile(args.marker_presence, tables_dir / "marker_presence.tsv")
     shutil.copyfile(args.marker_topology, tables_dir / "marker_topology_consistency.tsv")
@@ -842,6 +880,9 @@ def main() -> int:
         codon_rows,
         pairwise_rows,
         intergenomic_pair_rows,
+        reference_summary,
+        reference_pair_rows,
+        reference_nearest_rows,
         marker_presence_rows,
         marker_provenance_rows,
         presence_rows,
@@ -866,6 +907,9 @@ def main() -> int:
     params = {
         "pangenome_method": args.pangenome_method,
         "intergenomic_status": intergenomic_summary.get("status", "not_available"),
+        "reference_context_status": reference_summary.get("status", "not_available"),
+        "reference_context_rows": str(len(reference_pair_rows)),
+        "reference_nearest_rows": str(len(reference_nearest_rows)),
         "marker_status": marker_summary.get("status", "not_available"),
         "host_adaptation_rows": str(len(host_adaptation_rows)),
         "crispr_status": crispr_summary.get("status", "not_available"),
@@ -913,6 +957,10 @@ def main() -> int:
         ("table", "tables/intergenomic_similarity_matrix.tsv", "BLASTN intergenomic similarity score matrix"),
         ("table", "tables/intergenomic_distance_matrix.tsv", "BLASTN-derived distance matrix"),
         ("method", "tables/intergenomic_similarity_note.md", "Intergenomic similarity method note"),
+        ("table", "tables/reference_context_summary.tsv", "Local query/reference context summary"),
+        ("table", "tables/reference_context_nearest.tsv", "Nearest local reference per query"),
+        ("table", "tables/reference_context_pairs.tsv", "All local query/reference metric pairs"),
+        ("method", "tables/reference_context_note.md", "Local reference context method note"),
         ("table", "tables/marker_tree_summary.tsv", "Marker-gene phylogeny summary"),
         ("table", "tables/marker_presence.tsv", "Marker candidate selection table"),
         ("table", "tables/marker_topology_consistency.tsv", "Marker tree versus intergenomic-distance consistency table"),
@@ -945,6 +993,9 @@ def main() -> int:
         "intergenomic_matrix_rows": len(intergenomic_matrix_rows),
         "intergenomic_status": intergenomic_summary.get("status", "not_available"),
         "intergenomic_max_similarity_score_pct": intergenomic_summary.get("max_similarity_score_pct", "NA"),
+        "reference_context_status": reference_summary.get("status", "not_available"),
+        "reference_context_pair_rows": len(reference_pair_rows),
+        "reference_context_nearest_rows": len(reference_nearest_rows),
         "marker_status": marker_summary.get("status", "not_available"),
         "marker_trees_built": marker_summary.get("markers_built", "0"),
         "marker_presence_rows": len(marker_presence_rows),
@@ -973,6 +1024,9 @@ def main() -> int:
         "genomes": validation.get("genomes", str(len(fasta_rows))),
         "pangenome_method": args.pangenome_method,
         "intergenomic_status": intergenomic_summary.get("status", "not_available"),
+        "reference_context_status": reference_summary.get("status", "not_available"),
+        "reference_context_rows": str(len(reference_pair_rows)),
+        "reference_nearest_rows": str(len(reference_nearest_rows)),
         "marker_status": marker_summary.get("status", "not_available"),
         "host_adaptation_rows": str(len(host_adaptation_rows)),
         "crispr_status": crispr_summary.get("status", "not_available"),
@@ -984,9 +1038,9 @@ def main() -> int:
     }
     write_key_value(args.runtime_summary, runtime)
 
-    html_text = build_html(args, validation, cohort_summary, intergenomic_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_rows, host_adaptation_rows, crispr_match_rows, crispr_summary, intergenomic_pair_rows, marker_presence_rows, marker_topology_rows, marker_provenance_rows, optional_summary_rows, claim_rows, figure_paths, important_files)
+    html_text = build_html(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_rows, host_adaptation_rows, crispr_match_rows, crispr_summary, intergenomic_pair_rows, reference_pair_rows, reference_nearest_rows, marker_presence_rows, marker_topology_rows, marker_provenance_rows, optional_summary_rows, claim_rows, figure_paths, important_files)
     args.output_html.write_text(html_text)
-    args.output_md.write_text(build_markdown(args, validation, cohort_summary, intergenomic_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_adaptation_rows, crispr_match_rows, intergenomic_pair_rows, marker_topology_rows, optional_summary_rows))
+    args.output_md.write_text(build_markdown(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_adaptation_rows, crispr_match_rows, intergenomic_pair_rows, reference_nearest_rows, marker_topology_rows, optional_summary_rows))
     return 0
 
 
