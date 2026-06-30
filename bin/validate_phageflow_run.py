@@ -43,6 +43,7 @@ REQUIRED_TABLES = [
     "crispr_spacer_matches.tsv",
     "crispr_spacer_summary.tsv",
     "optional_tool_summary.tsv",
+    "optional_tool_metrics.tsv",
 ]
 
 OPTIONAL_GROUPS = {
@@ -331,6 +332,32 @@ def check_optional_summary_module(
     return ok
 
 
+def check_optional_metric_module(
+    results: list[dict[str, str]],
+    tables_dir: Path,
+    module: str,
+    sample_count: int,
+) -> bool:
+    path = tables_dir / "optional_tool_metrics.tsv"
+    rows = read_rows(path)
+    expected = 1 if module == "clinker" else sample_count
+    matching = [row for row in rows if row.get("tool") == module]
+    available = [row for row in matching if row.get("status") == "available"]
+    ok = len(matching) >= expected and len(available) >= expected
+    results.append(
+        {
+            "check": f"optional_metrics:{module}",
+            "path": str(path),
+            "exists": "true" if path.exists() else "false",
+            "nonempty": "true" if rows else "false",
+            "status": "PASS" if ok else "FAIL",
+            "observed_count": str(len(available)),
+            "minimum_count": str(expected),
+        }
+    )
+    return ok
+
+
 
 def check_host_adaptation(results: list[dict[str, str]], tables_dir: Path, figures_dir: Path) -> bool:
     ok = True
@@ -508,6 +535,7 @@ def main() -> int:
                 ok &= check_optional_module(results, outdir, module, sample_count, versions)
                 if module in {"trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "clinker", "iphop"}:
                     ok &= check_optional_summary_module(results, tables_dir, module, sample_count)
+                    ok &= check_optional_metric_module(results, tables_dir, module, sample_count)
 
     expected_summary_modules = [module for module in ["checkv", "pharokka", "genomad", "phold", "clinker", "iphop"] if getattr(args, f"expect_{module}_summary")]
     if expected_summary_modules:

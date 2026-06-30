@@ -51,32 +51,37 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
 
     output = tmp_path / "optional_tool_summary.tsv"
     summary_json = tmp_path / "optional_tool_summary.json"
+    metrics_output = tmp_path / "optional_tool_metrics.tsv"
+    metrics_json = tmp_path / "optional_tool_metrics.json"
+    common_args = [
+        "--samplesheet",
+        str(samplesheet),
+        "--trnascan-artifact",
+        str(trnascan),
+        "--bacphlip-artifact",
+        str(bacphlip),
+        "--abricate-artifact",
+        str(abricate),
+        "--checkv-artifact",
+        str(checkv),
+        "--pharokka-artifact",
+        str(pharokka),
+        "--genomad-artifact",
+        str(genomad),
+        "--phold-artifact",
+        str(phold),
+        "--iphop-artifact",
+        str(iphop),
+        "--clinker-artifact",
+        str(clinker),
+        "--clinker-artifact",
+        str(gbk_files),
+    ]
     subprocess.run(
         [
             sys.executable,
             str(REPO / "bin" / "optional_tool_summary.py"),
-            "--samplesheet",
-            str(samplesheet),
-            "--trnascan-artifact",
-            str(trnascan),
-            "--bacphlip-artifact",
-            str(bacphlip),
-            "--abricate-artifact",
-            str(abricate),
-            "--checkv-artifact",
-            str(checkv),
-            "--pharokka-artifact",
-            str(pharokka),
-            "--genomad-artifact",
-            str(genomad),
-            "--phold-artifact",
-            str(phold),
-            "--iphop-artifact",
-            str(iphop),
-            "--clinker-artifact",
-            str(clinker),
-            "--clinker-artifact",
-            str(gbk_files),
+            *common_args,
             "--output",
             str(output),
             "--summary-json",
@@ -112,6 +117,29 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     assert summary["status_counts"]["available"] == 9
     assert summary["status_counts"]["not_run"] == 8
 
+    subprocess.run(
+        [
+            sys.executable,
+            str(REPO / "bin" / "optional_tool_metrics.py"),
+            *common_args,
+            "--output",
+            str(metrics_output),
+            "--summary-json",
+            str(metrics_json),
+        ],
+        check=True,
+    )
+    metric_rows = list(csv.DictReader(metrics_output.open(), delimiter="\t"))
+    metric_index = {(row["tool"], row["sample_id"], row["metric"]): row for row in metric_rows}
+    assert metric_index[("checkv", "sample_a", "quality_summary_records")]["value"] == "1"
+    assert metric_index[("pharokka", "sample_a", "annotation_records")]["value"] == "1"
+    assert metric_index[("genomad", "sample_a", "classification_records")]["value"] == "1"
+    assert metric_index[("phold", "sample_a", "structural_annotation_records")]["value"] == "1"
+    assert metric_index[("iphop", "sample_a", "host_prediction_records")]["value"] == "1"
+    assert metric_index[("clinker", "COHORT", "genbank_inputs_listed")]["value"] == "2"
+    metrics_summary = json.loads(metrics_json.read_text())
+    assert metrics_summary["available_metric_rows"] > 0
+
 
 def run_completed_utility_regression(tmp_path: Path) -> None:
     run_root = tmp_path / "run"
@@ -138,6 +166,7 @@ def run_completed_utility_regression(tmp_path: Path) -> None:
     )
     summary = json.loads(summary_json.read_text())
     assert summary["optional_tool_summary"]["tool_counts"]["iphop"] == 1
+    assert summary["optional_tool_metrics_summary"]["tool_counts"]["iphop"] == 1
 
     subprocess.run(
         [
@@ -154,6 +183,7 @@ def run_completed_utility_regression(tmp_path: Path) -> None:
     with tarfile.open(package_tar, "r:gz") as tar:
         names = set(tar.getnames())
     assert "phageflow_package/phageflow_optional_tool_summary.tsv" in names
+    assert "phageflow_package/phageflow_optional_tool_metrics.tsv" in names
 
 
 def main() -> int:

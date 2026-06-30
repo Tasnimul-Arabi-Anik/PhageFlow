@@ -278,6 +278,7 @@ workflow {
         host_rscu_ch,
         crispr_matches_ch,
         crispr_summary_ch,
-        OPTIONAL_TOOL_SUMMARY.out.summary
+        OPTIONAL_TOOL_SUMMARY.out.summary,
+        OPTIONAL_TOOL_SUMMARY.out.metrics
     )
 }

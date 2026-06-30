@@ -119,6 +119,7 @@ process BUILD_REPORT {
     path crispr_matches
     path crispr_summary
     path optional_summary
+    path optional_metrics
 
     output:
     path "index.html", emit: html
@@ -168,6 +169,7 @@ process BUILD_REPORT {
         --crispr-matches "${crispr_matches}" \
         --crispr-summary "${crispr_summary}" \
         --optional-summary "${optional_summary}" \
+        --optional-metrics "${optional_metrics}" \
         --pangenome-method "${params.pangenome_method}" \
         --output-mode "${params.output_mode}" \
         --min-orf-aa ${params.min_orf_aa} \

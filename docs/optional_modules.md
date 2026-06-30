@@ -145,6 +145,25 @@ bash bin/phageflow optional-summary \
 
 This table summarizes tRNAscan-SE, BACPHLIP, ABRicate, CheckV, Pharokka, geNomad, Phold, clinker, and iPHoP artifact availability, primary artifact class, table row/column counts, file counts, sizes, and checksums. It intentionally does not print annotation values, host-prediction values, or make biological conclusions.
 
+## Optional Tool Metric Summary
+
+Every new PhageFlow report also includes:
+
+```text
+99_report/tables/optional_tool_metrics.tsv
+```
+
+Use the completed-run command when you want the same metric-count summary from an existing output directory:
+
+```bash
+bash bin/phageflow optional-metrics \
+  --root results/my_run \
+  --output results/my_run_optional_tool_metrics.tsv \
+  --summary-json results/my_run_optional_tool_metrics.json
+```
+
+This table reports compact counts from stable high-level optional-tool outputs, such as quality-summary rows, confidence fields detected, or host-prediction score fields detected. It intentionally does not print annotation values, taxonomy labels, predicted hosts, feature names, or biological conclusions.
+
 ## Completed-Run Pangenome Sensitivity Summary
 
 Run the MMseqs and RBH modes into separate output directories, then compare their software summary metrics:

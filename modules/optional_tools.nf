@@ -265,6 +265,8 @@ process OPTIONAL_TOOL_SUMMARY {
     output:
     path "optional_tool_summary.tsv", emit: summary
     path "optional_tool_summary.json", emit: summary_json
+    path "optional_tool_metrics.tsv", emit: metrics
+    path "optional_tool_metrics.json", emit: metrics_json
 
     script:
     def trnascanArgs = trnascan_artifacts.collect { "--trnascan-artifact ${it}" }.join(' ')
@@ -296,5 +298,21 @@ process OPTIONAL_TOOL_SUMMARY {
         ${clinkerArgs} \
         --output optional_tool_summary.tsv \
         --summary-json optional_tool_summary.json
+    python3 ${projectDir}/bin/optional_tool_metrics.py \
+        --samplesheet "${samplesheet}" \
+        ${trnascanArgs} \
+        ${bacphlipArgs} \
+        ${checkvArgs} \
+        ${abricateArgs} \
+        ${pharokkaArgs} \
+        ${genomadArgs} \
+        ${genomadLogArgs} \
+        ${pholdArgs} \
+        ${pholdLogArgs} \
+        ${iphopArgs} \
+        ${iphopLogArgs} \
+        ${clinkerArgs} \
+        --output optional_tool_metrics.tsv \
+        --summary-json optional_tool_metrics.json
     """
 }
