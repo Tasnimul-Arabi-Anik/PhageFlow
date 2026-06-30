@@ -2,15 +2,22 @@
 
 PhageFlow keeps the default environment small. Optional publication modules can be installed into the same removable conda prefix when needed.
 
+Commands in this guide assume you are inside the PhageFlow repository root after cloning:
+
+```bash
+git clone https://github.com/Tasnimul-Arabi-Anik/PhageFlow.git
+cd PhageFlow
+```
+
 ## Simple Install Commands
 
 ```bash
-bash phageflow/bin/phageflow install --with lite
-bash phageflow/bin/phageflow install --with publication
-bash phageflow/bin/phageflow install --with structure
-bash phageflow/bin/phageflow install --with phylogeny
-bash phageflow/bin/phageflow install --with host
-bash phageflow/bin/phageflow install --with all
+bash bin/phageflow install --with lite
+bash bin/phageflow install --with publication
+bash bin/phageflow install --with structure
+bash bin/phageflow install --with phylogeny
+bash bin/phageflow install --with host
+bash bin/phageflow install --with all
 ```
 
 Groups:
@@ -27,10 +34,10 @@ The installer handles executables only. Database-heavy tools still require user-
 ## Doctor Checks
 
 ```bash
-bash phageflow/bin/phageflow doctor --with publication
-bash phageflow/bin/phageflow doctor --with phylogeny
-bash phageflow/bin/phageflow doctor --with host
-bash phageflow/bin/phageflow doctor --with all
+bash bin/phageflow doctor --with publication
+bash bin/phageflow doctor --with phylogeny
+bash bin/phageflow doctor --with host
+bash bin/phageflow doctor --with all
 ```
 
 The doctor command reports whether the expected optional executables are visible in the active PhageFlow environment.
@@ -40,7 +47,7 @@ The doctor command reports whether the expected optional executables are visible
 After an optional run, validate only the optional modules that were expected to run:
 
 ```bash
-bash phageflow/bin/phageflow validate \
+bash bin/phageflow validate \
   --outdir results/phage_publication \
   --require-pangenome-rows \
   --expect-publication-optionals
@@ -49,7 +56,7 @@ bash phageflow/bin/phageflow validate \
 For Phold in addition to the publication group:
 
 ```bash
-bash phageflow/bin/phageflow validate \
+bash bin/phageflow validate \
   --outdir results/phage_publication_structure \
   --require-pangenome-rows \
   --expect-publication-optionals \
@@ -60,7 +67,7 @@ bash phageflow/bin/phageflow validate \
 Validate marker-gene phylogeny outputs when `--run_marker_tree true` was used:
 
 ```bash
-bash phageflow/bin/phageflow validate \
+bash bin/phageflow validate \
   --outdir results/phage_marker_tree \
   --expect-marker-tree
 ```
@@ -68,7 +75,7 @@ bash phageflow/bin/phageflow validate \
 Validate host codon-adaptation and CRISPR spacer matching outputs when a host samplesheet and spacer FASTA were supplied:
 
 ```bash
-bash phageflow/bin/phageflow validate \
+bash bin/phageflow validate \
   --outdir results/phage_host_context \
   --expect-host-adaptation \
   --expect-crispr-hits
@@ -77,7 +84,7 @@ bash phageflow/bin/phageflow validate \
 You can also validate individual modules:
 
 ```bash
-bash phageflow/bin/phageflow validate \
+bash bin/phageflow validate \
   --outdir results/my_run \
   --expect-trnascan \
   --expect-bacphlip \
@@ -89,7 +96,7 @@ The optional validator checks software-version records, expected files under `05
 To validate only the report-level optional summary after manually inspecting or packaging a completed run:
 
 ```bash
-bash phageflow/bin/phageflow validate \
+bash bin/phageflow validate \
   --outdir results/my_run \
   --expect-checkv-summary \
   --expect-pharokka-summary
@@ -100,7 +107,7 @@ bash phageflow/bin/phageflow validate \
 Use this on any completed run to summarize optional safety-related artifact presence and row counts without printing feature names:
 
 ```bash
-bash phageflow/bin/phageflow safety-summary \
+bash bin/phageflow safety-summary \
   --outdir results/my_run \
   --output results/my_run_safety_summary.tsv \
   --summary-json results/my_run_safety_summary.json
@@ -119,7 +126,7 @@ Every new PhageFlow report includes:
 Use the completed-run command when you want the same summary from an existing output directory:
 
 ```bash
-bash phageflow/bin/phageflow optional-summary \
+bash bin/phageflow optional-summary \
   --root results/my_run \
   --output results/my_run_optional_tool_summary.tsv \
   --summary-json results/my_run_optional_tool_summary.json
@@ -132,7 +139,7 @@ This table summarizes CheckV, Pharokka, geNomad, Phold, and clinker artifact ava
 Run the MMseqs and RBH modes into separate output directories, then compare their software summary metrics:
 
 ```bash
-bash phageflow/bin/phageflow pangenome-sensitivity \
+bash bin/phageflow pangenome-sensitivity \
   --left results/phage_cohort_mmseqs \
   --right results/phage_cohort_rbh \
   --output results/pangenome_sensitivity.tsv
@@ -145,7 +152,7 @@ This reports metric deltas only. It is intended for method-sensitivity QA and do
 Use this on a completed Phold-containing run or on a copied structural-artifact directory:
 
 ```bash
-bash phageflow/bin/phageflow structural-summary \
+bash bin/phageflow structural-summary \
   --outdir results/my_run \
   --output results/my_run_structural_summary.tsv \
   --summary-json results/my_run_structural_summary.json

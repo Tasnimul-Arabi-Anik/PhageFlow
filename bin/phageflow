@@ -15,18 +15,18 @@ usage() {
 PhageFlow launcher
 
 Usage:
-  phageflow/bin/phageflow install [--env-prefix PATH] [--with GROUPS] [--packages "pkg1 pkg2"]
-  phageflow/bin/phageflow test [--env-prefix PATH]
-  phageflow/bin/phageflow validate --outdir PATH [--env-prefix PATH] [extra validator args]
-  phageflow/bin/phageflow summarize --outdir PATH [--output summary.json]
-  phageflow/bin/phageflow safety-summary --outdir PATH [--output safety_summary.tsv]
-  phageflow/bin/phageflow optional-summary --root PATH [--output optional_tool_summary.tsv]
-  phageflow/bin/phageflow structural-summary --outdir PATH [--output structural_summary.tsv]
-  phageflow/bin/phageflow pangenome-sensitivity --left RUN_A --right RUN_B [--output comparison.tsv]
-  phageflow/bin/phageflow package --outdir PATH [--output package.tar.gz] [--include-logs]
-  phageflow/bin/phageflow container-smoke
-  phageflow/bin/phageflow run [--env-prefix PATH] [nextflow args]
-  phageflow/bin/phageflow doctor [--env-prefix PATH] [--with GROUPS]
+  bin/phageflow install [--env-prefix PATH] [--with GROUPS] [--packages "pkg1 pkg2"]
+  bin/phageflow test [--env-prefix PATH]
+  bin/phageflow validate --outdir PATH [--env-prefix PATH] [extra validator args]
+  bin/phageflow summarize --outdir PATH [--output summary.json]
+  bin/phageflow safety-summary --outdir PATH [--output safety_summary.tsv]
+  bin/phageflow optional-summary --root PATH [--output optional_tool_summary.tsv]
+  bin/phageflow structural-summary --outdir PATH [--output structural_summary.tsv]
+  bin/phageflow pangenome-sensitivity --left RUN_A --right RUN_B [--output comparison.tsv]
+  bin/phageflow package --outdir PATH [--output package.tar.gz] [--include-logs]
+  bin/phageflow container-smoke
+  bin/phageflow run [--env-prefix PATH] [nextflow args]
+  bin/phageflow doctor [--env-prefix PATH] [--with GROUPS]
 
 Optional install groups:
   lite         tRNAscan-SE, BACPHLIP, ABRicate
@@ -37,24 +37,24 @@ Optional install groups:
   all         publication + structure + phylogeny + host
 
 Examples:
-  bash phageflow/bin/phageflow test
-  bash phageflow/bin/phageflow run --input my_phage.fasta --outdir results/my_phage
-  bash phageflow/bin/phageflow summarize --outdir results/my_phage --output results/my_phage_summary.json
-  bash phageflow/bin/phageflow safety-summary --outdir results/my_phage --output results/my_phage_safety_summary.tsv
-  bash phageflow/bin/phageflow optional-summary --root results/my_phage --output results/my_phage_optional_tool_summary.tsv
-  bash phageflow/bin/phageflow structural-summary --outdir results/my_phage --output results/my_phage_structural_summary.tsv
-  bash phageflow/bin/phageflow pangenome-sensitivity --left results/mmseqs_run --right results/rbh_run --output pangenome_sensitivity.tsv
-  bash phageflow/bin/phageflow package --outdir results/my_phage --output my_phage_phageflow_package.tar.gz
-  bash phageflow/bin/phageflow container-smoke
-  bash phageflow/bin/phageflow install --with publication
-  bash phageflow/bin/phageflow install --with all --packages "custom-bioconda-tool"
-  bash phageflow/bin/phageflow doctor --with publication
-  bash phageflow/bin/phageflow install --with phylogeny
-  PHAGEFLOW_ENV_PREFIX=/tmp/phageflow-env bash phageflow/bin/phageflow install --with lite
+  bash bin/phageflow test
+  bash bin/phageflow run --input my_phage.fasta --outdir results/my_phage
+  bash bin/phageflow summarize --outdir results/my_phage --output results/my_phage_summary.json
+  bash bin/phageflow safety-summary --outdir results/my_phage --output results/my_phage_safety_summary.tsv
+  bash bin/phageflow optional-summary --root results/my_phage --output results/my_phage_optional_tool_summary.tsv
+  bash bin/phageflow structural-summary --outdir results/my_phage --output results/my_phage_structural_summary.tsv
+  bash bin/phageflow pangenome-sensitivity --left results/mmseqs_run --right results/rbh_run --output pangenome_sensitivity.tsv
+  bash bin/phageflow package --outdir results/my_phage --output my_phage_phageflow_package.tar.gz
+  bash bin/phageflow container-smoke
+  bash bin/phageflow install --with publication
+  bash bin/phageflow install --with all --packages "custom-bioconda-tool"
+  bash bin/phageflow doctor --with publication
+  bash bin/phageflow install --with phylogeny
+  PHAGEFLOW_ENV_PREFIX=/tmp/phageflow-env bash bin/phageflow install --with lite
 
 Behavior:
   If required tools are missing, the launcher creates a removable conda environment at
-  phageflow/.phageflow-env by default, or at PHAGEFLOW_ENV_PREFIX / --env-prefix.
+  .phageflow-env by default, or at PHAGEFLOW_ENV_PREFIX / --env-prefix.
   Optional groups install executables only; large databases such as CheckV, Pharokka,
   geNomad, and Phold databases still need to be downloaded/provided separately.
 EOF
@@ -402,7 +402,7 @@ case "${cmd}" in
     ;;
   test)
     ensure_env_or_system
-    cd "$(dirname "${PHAGEFLOW_DIR}")"
+    cd "${PHAGEFLOW_DIR}"
     nextflow run "${PHAGEFLOW_DIR}/main.nf" -profile test "$@"
     python3 "${PHAGEFLOW_DIR}/bin/validate_phageflow_run.py" --outdir phageflow_test_results --require-pangenome-rows
     ;;
@@ -433,7 +433,7 @@ case "${cmd}" in
     ;;
   run)
     ensure_env_or_system
-    cd "$(dirname "${PHAGEFLOW_DIR}")"
+    cd "${PHAGEFLOW_DIR}"
     nextflow run "${PHAGEFLOW_DIR}/main.nf" "$@"
     ;;
   *)

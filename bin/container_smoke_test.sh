@@ -2,7 +2,6 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_ROOT="$(cd "${ROOT}/.." && pwd)"
 IMAGE="${PHAGEFLOW_CONTAINER_IMAGE:-phageflow:smoke}"
 if [[ -n "${PHAGEFLOW_CONTAINER_OUTDIR:-}" ]]; then
   OUTDIR="${PHAGEFLOW_CONTAINER_OUTDIR}"
@@ -25,13 +24,13 @@ mkdir -p "${OUTDIR}/work"
 docker run --rm \
   --user "$(id -u):$(id -g)" \
   -e HOME=/tmp \
-  -v "${PROJECT_ROOT}:/work" \
+  -v "${ROOT}:/work" \
   -v "${OUTDIR}:/out" \
   -w /work \
   "${IMAGE}" \
-  nextflow run phageflow/main.nf \
+  nextflow run main.nf \
     -work-dir /out/work \
-    --input phageflow/assets/test_data/toy_phage_a.fasta \
+    --input assets/test_data/toy_phage_a.fasta \
     --pangenome_method none \
     --outdir /out/results
 

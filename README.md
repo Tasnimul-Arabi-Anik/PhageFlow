@@ -30,18 +30,25 @@ This workflow only processes existing sequence files and metadata. It does not p
 For a beginner-friendly copy-paste walkthrough, see [`docs/quickstart.md`](docs/quickstart.md).
 For optional publication modules and strict optional-output validation, see [`docs/optional_modules.md`](docs/optional_modules.md).
 
+Clone the repository and work from the clone root:
+
+```bash
+git clone https://github.com/Tasnimul-Arabi-Anik/PhageFlow.git
+cd PhageFlow
+```
+
 From this repository root, users can let PhageFlow install missing tools into a removable conda prefix and run the bundled validation data:
 
 ```bash
-bash phageflow/install.sh
-bash phageflow/bin/phageflow test
+bash install.sh
+bash bin/phageflow test
 ```
 
 Install optional tool groups with one command when you want publication-level modules:
 
 ```bash
-bash phageflow/bin/phageflow install --with publication
-bash phageflow/bin/phageflow doctor --with publication
+bash bin/phageflow install --with publication
+bash bin/phageflow doctor --with publication
 ```
 
 Optional install groups are `lite`, `publication`, `structure`, `phylogeny`, `host`, and `all`. These install executables only; large databases such as CheckV, Pharokka, geNomad, and Phold databases still need to be provided separately with the relevant workflow parameters.
@@ -49,32 +56,32 @@ Optional install groups are `lite`, `publication`, `structure`, `phylogeny`, `ho
 Run a real phage genome with automatic tool detection/installation:
 
 ```bash
-bash phageflow/bin/phageflow run --input my_phage.fasta --outdir results/my_phage
+bash bin/phageflow run --input my_phage.fasta --outdir results/my_phage
 ```
 
 Use a custom removable environment location:
 
 ```bash
-PHAGEFLOW_ENV_PREFIX=/path/to/removable/phageflow-env bash phageflow/bin/phageflow install
+PHAGEFLOW_ENV_PREFIX=/path/to/removable/phageflow-env bash bin/phageflow install
 ```
 
 Check the active environment/tools:
 
 ```bash
-bash phageflow/bin/phageflow doctor
+bash bin/phageflow doctor
 ```
 
 Summarize or package a completed run without rerunning the workflow:
 
 ```bash
-bash phageflow/bin/phageflow summarize --outdir results/my_phage --output results/my_phage_summary.json
-bash phageflow/bin/phageflow package --outdir results/my_phage --output my_phage_phageflow_package.tar.gz
+bash bin/phageflow summarize --outdir results/my_phage --output results/my_phage_summary.json
+bash bin/phageflow package --outdir results/my_phage --output my_phage_phageflow_package.tar.gz
 ```
 
 Summarize structural-annotation artifacts from a completed run or artifact directory:
 
 ```bash
-bash phageflow/bin/phageflow structural-summary \
+bash bin/phageflow structural-summary \
   --outdir results/my_phage \
   --output results/my_phage_structural_summary.tsv
 ```
@@ -82,7 +89,7 @@ bash phageflow/bin/phageflow structural-summary \
 Summarize optional CheckV/Pharokka/geNomad/Phold/clinker artifacts without rerunning the workflow:
 
 ```bash
-bash phageflow/bin/phageflow optional-summary \
+bash bin/phageflow optional-summary \
   --root results/my_phage \
   --output results/my_phage_optional_tool_summary.tsv
 ```
@@ -90,13 +97,13 @@ bash phageflow/bin/phageflow optional-summary \
 Run the optional container smoke test when Docker is available:
 
 ```bash
-bash phageflow/bin/phageflow container-smoke
+bash bin/phageflow container-smoke
 ```
 
 Compare pangenome summaries from two completed runs:
 
 ```bash
-bash phageflow/bin/phageflow pangenome-sensitivity \
+bash bin/phageflow pangenome-sensitivity \
   --left results/phage_cohort_mmseqs \
   --right results/phage_cohort_rbh \
   --output pangenome_sensitivity.tsv
@@ -128,8 +135,8 @@ host_1	/path/to/host.fasta	Salmonella enterica	GCF_000000000.1
 When host context is supplied, PhageFlow reports GC/tetranucleotide composition plus host codon-adaptation and RSCU metrics. Optional CRISPR spacer matching can be enabled with an existing spacer FASTA:
 
 ```bash
-bash phageflow/bin/phageflow install --with host
-nextflow run phageflow/main.nf \
+bash bin/phageflow install --with host
+nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --host_samplesheet host_samplesheet.tsv \
   --run_crispr_spacer_match true \
@@ -142,20 +149,20 @@ nextflow run phageflow/main.nf \
 Bundled validation test with native MMseqs pangenome:
 
 ```bash
-nextflow run phageflow/main.nf -profile test
-python3 phageflow/bin/validate_phageflow_run.py --outdir phageflow_test_results --require-pangenome-rows --expect-reference-context
+nextflow run main.nf -profile test
+python3 bin/validate_phageflow_run.py --outdir phageflow_test_results --require-pangenome-rows --expect-reference-context
 ```
 
 Single phage:
 
 ```bash
-nextflow run phageflow/main.nf --input my_phage.fasta --outdir results/my_phage
+nextflow run main.nf --input my_phage.fasta --outdir results/my_phage
 ```
 
 User cohort with default MMseqs pangenome:
 
 ```bash
-nextflow run phageflow/main.nf \
+nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --pangenome_method mmseqs \
   --outdir results/phage_cohort
@@ -164,7 +171,7 @@ nextflow run phageflow/main.nf \
 Conservative RBH-BLASTP comparison backend:
 
 ```bash
-nextflow run phageflow/main.nf \
+nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --pangenome_method rbh_blastp \
   --outdir results/phage_cohort_rbh
@@ -173,7 +180,7 @@ nextflow run phageflow/main.nf \
 Optional host context:
 
 ```bash
-nextflow run phageflow/main.nf \
+nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --host_samplesheet host_samplesheet.tsv \
   --outdir results/phage_host_context
@@ -182,7 +189,7 @@ nextflow run phageflow/main.nf \
 Sanitized summary for a completed run:
 
 ```bash
-bash phageflow/bin/phageflow summarize \
+bash bin/phageflow summarize \
   --outdir results/phage_cohort \
   --output results/phage_cohort_artifact_summary.json
 ```
@@ -190,7 +197,7 @@ bash phageflow/bin/phageflow summarize \
 Shareable report/QA package for a completed run:
 
 ```bash
-bash phageflow/bin/phageflow package \
+bash bin/phageflow package \
   --outdir results/phage_cohort \
   --output phage_cohort_phageflow_package.tar.gz
 ```
@@ -198,7 +205,7 @@ bash phageflow/bin/phageflow package \
 Production-style optional modules:
 
 ```bash
-nextflow run phageflow/main.nf \
+nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --run_trnascan true \
   --run_bacphlip true \
@@ -212,7 +219,7 @@ nextflow run phageflow/main.nf \
 Publication-enrichment modules for stronger comparative papers:
 
 ```bash
-nextflow run phageflow/main.nf \
+nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --run_genomad true \
   --genomad_db /path/to/genomad_db \
@@ -227,8 +234,8 @@ nextflow run phageflow/main.nf \
 Marker-gene phylogeny from user-supplied marker proteins:
 
 ```bash
-bash phageflow/bin/phageflow install --with phylogeny
-nextflow run phageflow/main.nf \
+bash bin/phageflow install --with phylogeny
+nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --run_marker_tree true \
   --marker_faa marker_proteins.faa \
@@ -289,13 +296,13 @@ Outputs are written under `--outdir`:
 Run the complete local validation suite:
 
 ```bash
-bash phageflow/bin/run_local_validation.sh
+bash bin/run_local_validation.sh
 ```
 
 Or validate an existing run:
 
 ```bash
-python3 phageflow/bin/validate_phageflow_run.py \
+python3 bin/validate_phageflow_run.py \
   --outdir phageflow_validation_mmseqs \
   --require-pangenome-rows \
   --expect-reference-context
@@ -304,7 +311,7 @@ python3 phageflow/bin/validate_phageflow_run.py \
 Validate expected optional outputs rigorously after an optional run:
 
 ```bash
-python3 phageflow/bin/validate_phageflow_run.py \
+python3 bin/validate_phageflow_run.py \
   --outdir results/phage_publication_enriched \
   --require-pangenome-rows \
   --expect-publication-optionals \
@@ -316,11 +323,11 @@ The validator checks the dashboard, manifests, report tables, figure counts, TIF
 Completed-run utilities:
 
 ```bash
-bash phageflow/bin/phageflow summarize --outdir phageflow_validation_mmseqs --output /tmp/phageflow_summary.json
-bash phageflow/bin/phageflow safety-summary --outdir phageflow_validation_mmseqs --output /tmp/phageflow_safety_summary.tsv
-bash phageflow/bin/phageflow optional-summary --root phageflow_validation_mmseqs --output /tmp/phageflow_optional_tool_summary.tsv
-bash phageflow/bin/phageflow structural-summary --outdir phageflow_validation_mmseqs --output /tmp/phageflow_structural_summary.tsv
-bash phageflow/bin/phageflow package --outdir phageflow_validation_mmseqs --output /tmp/phageflow_package.tar.gz
+bash bin/phageflow summarize --outdir phageflow_validation_mmseqs --output /tmp/phageflow_summary.json
+bash bin/phageflow safety-summary --outdir phageflow_validation_mmseqs --output /tmp/phageflow_safety_summary.tsv
+bash bin/phageflow optional-summary --root phageflow_validation_mmseqs --output /tmp/phageflow_optional_tool_summary.tsv
+bash bin/phageflow structural-summary --outdir phageflow_validation_mmseqs --output /tmp/phageflow_structural_summary.tsv
+bash bin/phageflow package --outdir phageflow_validation_mmseqs --output /tmp/phageflow_package.tar.gz
 ```
 
 `summarize` reports sanitized artifact counts, anonymous TSV/figure IDs, file sizes, checksums, validation-manifest status, optional-screen artifact status, optional-tool artifact status, structural-artifact status, and generic PASS/FAIL/WARN/ERROR marker counts. `safety-summary` reports optional safety-related artifact presence and row counts without printing feature names. `optional-summary` reports CheckV/Pharokka/geNomad/Phold/clinker artifact presence, table shapes, sizes, and checksums without printing annotation values. `structural-summary` reports structural-annotation artifact classes, table shapes, sizes, and checksums without printing annotation values. `package` creates a report/QA archive with relative paths, package checksums, optional-screen, optional-tool, and structural summaries, and the sanitized artifact summary.
@@ -328,7 +335,7 @@ bash phageflow/bin/phageflow package --outdir phageflow_validation_mmseqs --outp
 Compare completed pangenome runs:
 
 ```bash
-bash phageflow/bin/phageflow pangenome-sensitivity \
+bash bin/phageflow pangenome-sensitivity \
   --left phageflow_validation_mmseqs \
   --right phageflow_validation_rbh \
   --output /tmp/phageflow_pangenome_sensitivity.tsv
@@ -341,14 +348,14 @@ This compares summary metrics only and does not interpret biological meaning.
 Use conda if you want a removable local environment:
 
 ```bash
-nextflow run phageflow/main.nf -profile conda --input phage_samplesheet.tsv
+nextflow run main.nf -profile conda --input phage_samplesheet.tsv
 ```
 
 Build Docker image:
 
 ```bash
-docker build -t phageflow:latest -f phageflow/containers/Dockerfile phageflow
-nextflow run phageflow/main.nf -profile docker --input phage_samplesheet.tsv
+docker build -t phageflow:latest -f containers/Dockerfile .
+nextflow run main.nf -profile docker --input phage_samplesheet.tsv
 ```
 
 ## Publication Note
