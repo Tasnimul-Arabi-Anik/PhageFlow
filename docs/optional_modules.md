@@ -201,6 +201,20 @@ bash bin/phageflow functional-summary \
 
 The first implementation counts broad category values from Pharokka-style category columns, such as PHROG category fields, when present. It does not print individual gene/product annotations and reports `not_run` or `category_column_missing` when a consistent category column is absent.
 
+## Imported Network Context
+
+PhageFlow does not run vConTACT2 or assign network taxonomy. To include counts from a completed vConTACT2-style output directory:
+
+```bash
+bash bin/phageflow network-summary \
+  --vcontact-dir results/vcontact2 \
+  --output results/my_run_network_context_summary.tsv \
+  --summary-json results/my_run_network_context_summary.json \
+  --import-to-report results/my_run
+```
+
+The import summarizes row/column counts from overview tables and node/edge counts from network files. It does not print cluster assignments, taxonomy labels, or biological conclusions. Imported tables are written to `99_report/tables/network_context_summary.tsv` and included by `summarize`/`package`.
+
 ## Completed-Run Pangenome Sensitivity Summary
 
 Run the MMseqs and RBH modes into separate output directories, then compare their software summary metrics:

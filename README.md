@@ -100,6 +100,11 @@ bash bin/phageflow optional-metrics \
 bash bin/phageflow functional-summary \
   --root results/my_phage \
   --output results/my_phage_functional_category_summary.tsv
+
+bash bin/phageflow network-summary \
+  --vcontact-dir results/vcontact2 \
+  --output results/my_phage_network_context_summary.tsv \
+  --import-to-report results/my_phage
 ```
 
 Run the optional container smoke test when Docker is available:
@@ -353,11 +358,12 @@ bash bin/phageflow safety-summary --outdir phageflow_validation_mmseqs --output 
 bash bin/phageflow optional-summary --root phageflow_validation_mmseqs --output /tmp/phageflow_optional_tool_summary.tsv
 bash bin/phageflow optional-metrics --root phageflow_validation_mmseqs --output /tmp/phageflow_optional_tool_metrics.tsv
 bash bin/phageflow functional-summary --root phageflow_validation_mmseqs --output /tmp/phageflow_functional_category_summary.tsv
+bash bin/phageflow network-summary --vcontact-dir /path/to/completed_vcontact2 --output /tmp/phageflow_network_context_summary.tsv --import-to-report phageflow_validation_mmseqs
 bash bin/phageflow structural-summary --outdir phageflow_validation_mmseqs --output /tmp/phageflow_structural_summary.tsv
 bash bin/phageflow package --outdir phageflow_validation_mmseqs --output /tmp/phageflow_package.tar.gz
 ```
 
-`summarize` reports sanitized artifact counts, anonymous TSV/figure IDs, file sizes, checksums, validation-manifest status, optional-screen artifact status, optional-tool artifact status, optional-tool metric status, functional-category status, imported pangenome-sensitivity status, structural-artifact status, and generic PASS/FAIL/WARN/ERROR marker counts. `safety-summary` reports optional safety-related artifact presence and row counts without printing feature names. `optional-summary` reports optional-tool artifact presence, table shapes, sizes, and checksums without printing annotation values. `optional-metrics` reports compact high-level metric counts without printing annotation, taxonomy, host-prediction, or feature values. `functional-summary` reports broad category counts from consistent heavy annotation outputs without printing individual gene/product annotations. `structural-summary` reports structural-annotation artifact classes, table shapes, sizes, and checksums without printing annotation values. `package` creates a report/QA archive with relative paths, package checksums, optional-screen, optional-tool, optional-metric, functional-category, pangenome-sensitivity, and structural summaries, and the sanitized artifact summary.
+`summarize` reports sanitized artifact counts, anonymous TSV/figure IDs, file sizes, checksums, validation-manifest status, optional-screen artifact status, optional-tool artifact status, optional-tool metric status, functional-category status, imported pangenome-sensitivity status, imported network-context status, structural-artifact status, and generic PASS/FAIL/WARN/ERROR marker counts. `safety-summary` reports optional safety-related artifact presence and row counts without printing feature names. `optional-summary` reports optional-tool artifact presence, table shapes, sizes, and checksums without printing annotation values. `optional-metrics` reports compact high-level metric counts without printing annotation, taxonomy, host-prediction, or feature values. `functional-summary` reports broad category counts from consistent heavy annotation outputs without printing individual gene/product annotations. `network-summary` imports completed vConTACT2-style output counts without assigning taxonomy or interpreting clusters. `structural-summary` reports structural-annotation artifact classes, table shapes, sizes, and checksums without printing annotation values. `package` creates a report/QA archive with relative paths, package checksums, optional-screen, optional-tool, optional-metric, functional-category, pangenome-sensitivity, network-context, and structural summaries, and the sanitized artifact summary.
 
 Compare completed pangenome runs:
 

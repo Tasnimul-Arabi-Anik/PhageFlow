@@ -12,6 +12,7 @@ v0.4 analysis-expansion first pass:
 - Added import-only PhaBOX/PhaBOX2 artifact and metric summaries without adding a default wrapper or database dependency.
 - Added an analysis capability matrix that separates lightweight defaults, heavy optional wrappers, import-only summaries, and deferred candidates.
 - Added `functional_category_summary.tsv` and `phageflow functional-summary` for broad category counts from consistent heavy annotation outputs.
+- Added import-only `phageflow network-summary` for completed vConTACT2-style overview/network output counts.
 
 ## v0.3.0-validated - 2026-07-01
 

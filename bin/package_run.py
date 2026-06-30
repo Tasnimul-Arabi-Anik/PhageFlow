@@ -9,6 +9,7 @@ from pathlib import Path
 
 from artifact_inventory import collect_artifact_summary, checksum_rows, default_package_files, rows_to_tsv
 from functional_category_summary import collect_functional_category_rows, rows_to_tsv as functional_rows_to_tsv, summarize_rows as summarize_functional_rows
+from network_context_summary import report_import_summary as network_import_summary
 from optional_tool_metrics import collect_optional_metric_rows, rows_to_tsv as optional_metric_rows_to_tsv
 from optional_tool_summary import collect_optional_rows, rows_to_tsv as optional_rows_to_tsv
 from pangenome_sensitivity import report_import_summary, summary_rows_to_tsv, summarize_rows, read_comparison_rows
@@ -101,6 +102,7 @@ def main() -> int:
     }
     summary["functional_category_summary"] = summarize_functional_rows(functional_rows)
     summary["pangenome_sensitivity_summary"] = report_import_summary(root)
+    summary["network_context_summary"] = network_import_summary(root)
     prefix = "phageflow_package"
 
     with tarfile.open(output, "w:gz") as tar:
