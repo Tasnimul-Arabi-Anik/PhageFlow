@@ -11,7 +11,7 @@ body:
     id: version
     attributes:
       label: PhageFlow version or commit
-      placeholder: "v0.2.0-dev or git commit"
+      placeholder: "v0.3.0-validated or git commit"
     validations:
       required: true
   - type: dropdown

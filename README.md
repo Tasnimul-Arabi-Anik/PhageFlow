@@ -9,14 +9,11 @@ PhageFlow now treats Nextflow as the single normal execution layer. The previous
 
 ## Current Status
 
-PhageFlow is functionally complete and validated for the current lightweight single-genome and small-cohort genome-analysis scope. The first strict-validation milestone is `v0.1.0-validated`; the current repository state is `v0.2.0-dev`, which adds completed-run QA, packaging, provenance, and release-polish utilities on top of the validated core.
+PhageFlow is functionally complete and validated for the current lightweight single-genome and small-cohort genome-analysis scope. The current release state is `v0.3.0-validated`, which includes completed-run QA, packaging, provenance, optional-tool artifact summaries, local reference-context reporting, and release validation on top of the original validated core.
 
 This is a software/workflow validation statement only. Biological interpretation, manuscript-grade conclusions, and project-specific claims remain outside the pipeline validation scope. See [`docs/validation_status.md`](docs/validation_status.md) for the validation evidence and boundaries, and [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for the release-state summary.
 
-The proposed v0.2 extension plan is reviewed in [`docs/v0.2_extension_review.md`](docs/v0.2_extension_review.md). It prioritizes software-facing QA, packaging, and conservative artifact summaries before heavier optional analyses.
-Current v0.2 progress is tracked in [`docs/v0.2_roadmap_status.md`](docs/v0.2_roadmap_status.md).
-The v0.2 completion audit is in [`docs/v0.2_completion_audit.md`](docs/v0.2_completion_audit.md).
-The next optional-analysis roadmap is in [`docs/v0.3_analysis_roadmap.md`](docs/v0.3_analysis_roadmap.md).
+The v0.2 extension review, roadmap status, and completion audit are preserved in [`docs/v0.2_extension_review.md`](docs/v0.2_extension_review.md), [`docs/v0.2_roadmap_status.md`](docs/v0.2_roadmap_status.md), and [`docs/v0.2_completion_audit.md`](docs/v0.2_completion_audit.md). The v0.3 analysis roadmap is in [`docs/v0.3_analysis_roadmap.md`](docs/v0.3_analysis_roadmap.md).
 
 ## What It Does
 

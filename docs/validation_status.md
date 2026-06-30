@@ -1,12 +1,12 @@
 # PhageFlow Validation Status
 
-Status: `v0.1.0-validated`
+Status: `v0.3.0-validated`
 
-Validation date: 2026-06-29
+Validation date: 2026-07-01
 
 ## Scope
 
-PhageFlow is complete for the current lightweight single-genome and small-cohort genome-analysis scope. This status covers software workflow execution, report generation, validation checks, and sanitized artifact inventory. It does not claim domain interpretation or manuscript-grade biological conclusions.
+PhageFlow is complete for the current lightweight single-genome and small-cohort genome-analysis scope. This status covers software workflow execution, report generation, validation checks, completed-run QA utilities, optional artifact summaries, local reference-context reporting, container smoke validation, and package export. It does not claim domain interpretation or manuscript-grade biological conclusions.
 
 ## Completed
 
@@ -17,10 +17,30 @@ PhageFlow is complete for the current lightweight single-genome and small-cohort
 - Optional host-context artifact branch.
 - CLI install, doctor, run, test, and validate commands.
 - Report generation with tables, figures, manifests, versions, parameters, and runtime summaries.
-- Strict validator passed on focused local workflow output.
-- Sanitized artifact QA inventory generated with anonymous artifact IDs, row and column counts, file sizes, and checksums.
+- Completed-run summarize, safety-summary, optional-summary, structural-summary, pangenome-sensitivity, and package utilities.
+- Optional-tool artifact summaries for CheckV, Pharokka, geNomad, Phold, and clinker.
+- Local reference-context branch for samplesheets with `role=reference`.
+- Strict validator coverage for pangenome rows, marker-tree outputs, host-context outputs, CRISPR spacer hits, optional-module outputs, and local reference-context outputs when requested.
 
 ## Validation Evidence
+
+Release validation commands for `v0.3.0-validated`:
+
+- `python3 -m py_compile bin/*.py`
+- `bash -n bin/phageflow bin/run_local_validation.sh bin/container_smoke_test.sh`
+- `git diff --check`
+- `bash bin/run_local_validation.sh`
+- `bash bin/phageflow container-smoke`
+
+Release validation outcomes:
+
+- Full local validation suite: passed.
+- Container smoke test: passed.
+- Package export from completed run: passed.
+- Local reference-context validator check: passed in bundled cohort validation runs.
+- Marker-tree validator check: passed in bundled marker-tree validation run.
+
+Historical `v0.1.0-validated` focused audit:
 
 - Full focused local Nextflow run: completed.
 - Strict validator: passed.
@@ -34,7 +54,7 @@ PhageFlow is complete for the current lightweight single-genome and small-cohort
 - Report/log/version/manifest/checksum-like files: 8.
 - Generic marker counts: PASS 38, FAIL 0, WARN 0, ERROR 0.
 
-The final artifact audit did not rerun the workflow, print table contents, expose result paths, or perform domain-specific interpretation. The artifact inventory used anonymous IDs for TSV and figure files.
+The historical artifact audit did not rerun the workflow, print table contents, expose result paths, or perform domain-specific interpretation. The artifact inventory used anonymous IDs for TSV and figure files.
 
 ## Boundaries
 
@@ -45,9 +65,9 @@ The final artifact audit did not rerun the workflow, print table contents, expos
 
 ## Remaining Polish
 
-The remaining work is release polish rather than core functionality:
+Remaining work after `v0.3.0-validated` is future feature work, not release-blocking core validation:
 
-- README and example-command cleanup as the public interface evolves.
-- Packaging and container release checks.
-- Clear labeling of demo or stress-test outputs versus outputs suitable for formal reporting.
-- Optional release archive or tag named `v0.1.0-validated`.
+- Optional reference package manifest beyond existing run/report manifests.
+- Optional host-prediction wrapper with a local database contract.
+- Pangenome method concordance import into reports.
+- Marker-tree QC dashboard refinements.

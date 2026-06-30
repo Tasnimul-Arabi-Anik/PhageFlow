@@ -1,23 +1,37 @@
 # PhageFlow Release Notes
 
-## v0.1.0-validated - 2026-06-29
+## v0.3.0-validated - 2026-07-01
 
-PhageFlow is functionally complete and validated for the current lightweight single-genome and small-cohort genome-analysis scope.
+PhageFlow v0.3.0 is validated as a local, reproducible software workflow for lightweight single-genome and small-cohort phage genome analysis. This release keeps biological interpretation conservative and treats report outputs as software artifacts, not manuscript-grade conclusions.
 
 Validation state:
 
-- Focused local Nextflow workflow run completed.
-- Strict validator passed.
-- Sanitized artifact QA inventory completed with anonymous artifact IDs, row and column counts, file sizes, and checksums.
-- Final artifact audit did not rerun the workflow, print table contents, expose result paths, or perform domain-specific interpretation.
+- Python utility compilation passed.
+- Shell syntax checks passed.
+- Full local validation suite passed, including MMseqs, RBH-BLASTP, single-genome, marker-tree, completed-run summary utilities, and package export.
+- Container smoke test passed with an isolated Nextflow work directory under the container output mount.
+- GitHub static CI covers Python compilation, shell syntax, bundled-input validation, and tracked-size checks.
+
+v0.3 priority-1 increment:
+
+- Added `phageflow optional-summary` and `bin/optional_tool_summary.py` for conservative CheckV/Pharokka/geNomad/Phold/clinker artifact summaries.
+- Added `optional_tool_summary.tsv` to new reports, report HTML/Markdown, runtime summaries, validation manifest, important-files manifest, and claim-evidence matrix.
+- Added optional-summary integration to `summarize` and `package`.
+- Extended validator coverage so expected CheckV/Pharokka/geNomad/Phold/clinker modules also require report-level optional summary rows; added `--expect-*-summary` flags for report-only checks.
+- Reviewed Clinker static export feasibility and kept native HTML/alignment artifacts as the validated contract; automated SVG/PNG/PDF export remains deferred until a stable upstream CLI or separate browser-rendering contract is available.
+
+v0.3 priority-2 increment:
+
+- Added local reference-context reporting for samplesheets that mark rows as `role=reference`.
+- Added nearest-reference and all query/reference metric tables, report integration, claim-evidence rows, runtime/validation manifest counters, and method limitations.
+- Added validator support with `--expect-reference-context` and wired the bundled cohort validation runs to require it.
 
 Scope boundaries:
 
 - Software/workflow validation is claimed.
 - Domain interpretation is not claimed.
 - Manuscript-grade biological conclusion is not claimed.
-
-Remaining work is release polish: README and example-command refinement, packaging/container checks, and clear labeling of demo or stress-test outputs versus outputs suitable for formal reporting.
+- Network-dependent public reference discovery remains outside the core workflow.
 
 ## v0.2.0-dev - 2026-06-30
 
@@ -44,16 +58,21 @@ Release polish:
 - Clarified README status so `v0.1.0-validated` is the first strict-validation milestone and `v0.2.0-dev` is the current development state.
 - Added `docs/v0.3_analysis_roadmap.md` ranking future optional-analysis additions without copying whole external pipelines.
 
-v0.3 priority-1 increment:
+## v0.1.0-validated - 2026-06-29
 
-- Added `phageflow optional-summary` and `bin/optional_tool_summary.py` for conservative CheckV/Pharokka/geNomad/Phold/clinker artifact summaries.
-- Added `optional_tool_summary.tsv` to new reports, report HTML/Markdown, runtime summaries, validation manifest, important-files manifest, and claim-evidence matrix.
-- Added optional-summary integration to `summarize` and `package`.
-- Extended validator coverage so expected CheckV/Pharokka/geNomad/Phold/clinker modules also require report-level optional summary rows; added `--expect-*-summary` flags for report-only checks.
-- Reviewed Clinker static export feasibility and kept native HTML/alignment artifacts as the validated contract; automated SVG/PNG/PDF export remains deferred until a stable upstream CLI or separate browser-rendering contract is available.
+PhageFlow is functionally complete and validated for the current lightweight single-genome and small-cohort genome-analysis scope.
 
-v0.3 priority-2 increment:
+Validation state:
 
-- Added local reference-context reporting for samplesheets that mark rows as `role=reference`.
-- Added nearest-reference and all query/reference metric tables, report integration, claim-evidence rows, runtime/validation manifest counters, and method limitations.
-- Added validator support with `--expect-reference-context` and wired the bundled cohort validation runs to require it.
+- Focused local Nextflow workflow run completed.
+- Strict validator passed.
+- Sanitized artifact QA inventory completed with anonymous artifact IDs, row and column counts, file sizes, and checksums.
+- Final artifact audit did not rerun the workflow, print table contents, expose result paths, or perform domain-specific interpretation.
+
+Scope boundaries:
+
+- Software/workflow validation is claimed.
+- Domain interpretation is not claimed.
+- Manuscript-grade biological conclusion is not claimed.
+
+Remaining work is release polish: README and example-command refinement, packaging/container checks, and clear labeling of demo or stress-test outputs versus outputs suitable for formal reporting.
