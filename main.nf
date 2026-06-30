@@ -2,7 +2,7 @@ nextflow.enable.dsl = 2
 
 include { VALIDATE_SAMPLESHEET; FASTA_STATS; SIMPLE_ORF_PREDICT; CODON_USAGE; BUILD_REPORT } from './modules/core'
 include { COHORT_SIMILARITY; INTERGENOMIC_SIMILARITY; NO_INTERGENOMIC_SIMILARITY; MARKER_PHYLOGENY; NO_MARKER_PHYLOGENY; MMSEQS_PANGENOME; RBH_PANGENOME; NO_PANGENOME; RUN_LEGACY_SNAKEMAKE_PANGENOME } from './modules/comparative'
-include { TRNASCAN; BACPHLIP; CHECKV; ABRICATE; PHAROKKA; GENOMAD; PHOLD; CLINKER_SYNTENY } from './modules/optional_tools'
+include { TRNASCAN; BACPHLIP; CHECKV; ABRICATE; PHAROKKA; GENOMAD; PHOLD; CLINKER_SYNTENY; OPTIONAL_TOOL_SUMMARY } from './modules/optional_tools'
 include { HOST_CONTEXT_LIGHT; NO_HOST_CONTEXT } from './modules/host'
 
 def paramEnabled(value) {
@@ -133,6 +133,9 @@ workflow {
 
     if (paramEnabled(params.run_checkv)) {
         CHECKV(samples_ch)
+        checkv_artifacts_ch = CHECKV.out.checkv_dir.map { sample_id, checkv_dir -> checkv_dir }.collect()
+    } else {
+        checkv_artifacts_ch = Channel.value([])
     }
 
     if (paramEnabled(params.run_abricate)) {
@@ -142,20 +145,52 @@ workflow {
     def needs_pharokka = paramEnabled(params.run_pharokka) || paramEnabled(params.run_phold) || paramEnabled(params.run_clinker)
     if (needs_pharokka) {
         PHAROKKA(samples_ch)
+        pharokka_artifacts_ch = PHAROKKA.out.pharokka_dir.map { sample_id, pharokka_dir -> pharokka_dir }.collect()
+    } else {
+        pharokka_artifacts_ch = Channel.value([])
     }
 
     if (paramEnabled(params.run_genomad)) {
         GENOMAD(samples_ch)
+        genomad_artifacts_ch = GENOMAD.out.genomad_dir.map { sample_id, genomad_dir -> genomad_dir }.collect()
+        genomad_logs_ch = GENOMAD.out.log.map { sample_id, genomad_log -> genomad_log }.collect()
+    } else {
+        genomad_artifacts_ch = Channel.value([])
+        genomad_logs_ch = Channel.value([])
     }
 
     if (paramEnabled(params.run_phold)) {
         PHOLD(PHAROKKA.out.pharokka_dir)
+        phold_artifacts_ch = PHOLD.out.phold_dir.map { sample_id, phold_dir -> phold_dir }.collect()
+        phold_logs_ch = PHOLD.out.log.map { sample_id, phold_log -> phold_log }.collect()
+    } else {
+        phold_artifacts_ch = Channel.value([])
+        phold_logs_ch = Channel.value([])
     }
 
     if (paramEnabled(params.run_clinker)) {
         pharokka_dirs_ch = PHAROKKA.out.pharokka_dir.map { sample_id, pharokka_dir -> pharokka_dir }.collect()
         CLINKER_SYNTENY(pharokka_dirs_ch)
+        clinker_artifacts_ch = CLINKER_SYNTENY.out.gbk_files
+            .mix(CLINKER_SYNTENY.out.html)
+            .mix(CLINKER_SYNTENY.out.alignments)
+            .mix(CLINKER_SYNTENY.out.log)
+            .mix(CLINKER_SYNTENY.out.note)
+            .collect()
+    } else {
+        clinker_artifacts_ch = Channel.value([])
     }
+
+    OPTIONAL_TOOL_SUMMARY(
+        VALIDATE_SAMPLESHEET.out.samplesheet,
+        checkv_artifacts_ch,
+        pharokka_artifacts_ch,
+        genomad_artifacts_ch,
+        genomad_logs_ch,
+        phold_artifacts_ch,
+        phold_logs_ch,
+        clinker_artifacts_ch
+    )
 
     if (params.host_samplesheet && (params.host_samplesheet as String) != 'null') {
         resolved_host_input = params.host_samplesheet as String
@@ -208,6 +243,7 @@ workflow {
         host_adaptation_ch,
         host_rscu_ch,
         crispr_matches_ch,
-        crispr_summary_ch
+        crispr_summary_ch,
+        OPTIONAL_TOOL_SUMMARY.out.summary
     )
 }

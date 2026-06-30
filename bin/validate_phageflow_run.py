@@ -39,6 +39,7 @@ REQUIRED_TABLES = [
     "host_codon_rscu.tsv",
     "crispr_spacer_matches.tsv",
     "crispr_spacer_summary.tsv",
+    "optional_tool_summary.tsv",
 ]
 
 OPTIONAL_GROUPS = {
@@ -110,6 +111,14 @@ def read_software_versions(path: Path) -> dict[str, str]:
             if tool:
                 values[tool] = row.get("version_or_status", "")
     return values
+
+
+def read_rows(path: Path) -> list[dict[str, str]]:
+    if not path.exists() or path.stat().st_size == 0:
+        return []
+    with path.open(newline="") as handle:
+        reader = csv.DictReader(handle, delimiter="\t")
+        return [dict(row) for row in reader]
 
 
 def path_has_content(path: Path) -> bool:
@@ -286,6 +295,32 @@ def check_optional_module(
     return bool(ok)
 
 
+def check_optional_summary_module(
+    results: list[dict[str, str]],
+    tables_dir: Path,
+    module: str,
+    sample_count: int,
+) -> bool:
+    path = tables_dir / "optional_tool_summary.tsv"
+    rows = read_rows(path)
+    expected = 1 if module == "clinker" else sample_count
+    matching = [row for row in rows if row.get("tool") == module]
+    available = [row for row in matching if row.get("status") == "available"]
+    ok = len(matching) >= expected and len(available) >= expected
+    results.append(
+        {
+            "check": f"optional_summary:{module}",
+            "path": str(path),
+            "exists": "true" if path.exists() else "false",
+            "nonempty": "true" if rows else "false",
+            "status": "PASS" if ok else "FAIL",
+            "observed_count": str(len(available)),
+            "minimum_count": str(expected),
+        }
+    )
+    return ok
+
+
 
 def check_host_adaptation(results: list[dict[str, str]], tables_dir: Path, figures_dir: Path) -> bool:
     ok = True
@@ -363,6 +398,8 @@ def main() -> int:
     parser.add_argument("--expect-publication-optionals", action="store_true", help="Require tRNAscan-SE, BACPHLIP, CheckV, ABRicate, Pharokka, geNomad, and clinker outputs.")
     for module in ["trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "clinker"]:
         parser.add_argument(f"--expect-{module}", action="store_true", help=f"Require {module} optional outputs and software-version records.")
+    for module in ["checkv", "pharokka", "genomad", "phold", "clinker"]:
+        parser.add_argument(f"--expect-{module}-summary", action="store_true", help=f"Require {module} rows in 99_report/tables/optional_tool_summary.tsv.")
     args = parser.parse_args()
 
     outdir = args.outdir
@@ -433,6 +470,16 @@ def main() -> int:
                     ok &= check_software(results, versions, tool)
             else:
                 ok &= check_optional_module(results, outdir, module, sample_count, versions)
+                if module in {"checkv", "pharokka", "genomad", "phold", "clinker"}:
+                    ok &= check_optional_summary_module(results, tables_dir, module, sample_count)
+
+    expected_summary_modules = [module for module in ["checkv", "pharokka", "genomad", "phold", "clinker"] if getattr(args, f"expect_{module}_summary")]
+    if expected_summary_modules:
+        samples = read_samples(normalized_samplesheet)
+        validation_values = read_key_value(outdir / "00_inputs" / "validation_summary.tsv")
+        sample_count = len(samples) or int(float(validation_values.get("genomes", "1") or 1))
+        for module in expected_summary_modules:
+            ok &= check_optional_summary_module(results, tables_dir, module, sample_count)
 
     report_path = args.report or (report_dir / "phageflow_validation_report.tsv")
     report_path.parent.mkdir(parents=True, exist_ok=True)

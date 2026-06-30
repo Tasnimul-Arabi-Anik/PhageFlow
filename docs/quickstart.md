@@ -102,6 +102,14 @@ bash phageflow/bin/phageflow safety-summary \
   --output beginner_single_phage_safety_summary.tsv
 ```
 
+Create a conservative optional-tool artifact summary:
+
+```bash
+bash phageflow/bin/phageflow optional-summary \
+  --root beginner_single_phage_results \
+  --output beginner_single_phage_optional_tool_summary.tsv
+```
+
 Create a structural-artifact inventory if structural outputs are present:
 
 ```bash
@@ -116,6 +124,7 @@ Expected output:
 beginner_single_phage_results/99_report/index.html
 beginner_single_phage_results/99_report/figures/
 beginner_single_phage_results/99_report/tables/
+beginner_single_phage_results/99_report/tables/optional_tool_summary.tsv
 ```
 
 Use `--pangenome_method none` for a single genome because pangenome clustering is most useful for two or more related phage genomes.

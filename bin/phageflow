@@ -20,6 +20,7 @@ Usage:
   phageflow/bin/phageflow validate --outdir PATH [--env-prefix PATH] [extra validator args]
   phageflow/bin/phageflow summarize --outdir PATH [--output summary.json]
   phageflow/bin/phageflow safety-summary --outdir PATH [--output safety_summary.tsv]
+  phageflow/bin/phageflow optional-summary --root PATH [--output optional_tool_summary.tsv]
   phageflow/bin/phageflow structural-summary --outdir PATH [--output structural_summary.tsv]
   phageflow/bin/phageflow pangenome-sensitivity --left RUN_A --right RUN_B [--output comparison.tsv]
   phageflow/bin/phageflow package --outdir PATH [--output package.tar.gz] [--include-logs]
@@ -40,6 +41,7 @@ Examples:
   bash phageflow/bin/phageflow run --input my_phage.fasta --outdir results/my_phage
   bash phageflow/bin/phageflow summarize --outdir results/my_phage --output results/my_phage_summary.json
   bash phageflow/bin/phageflow safety-summary --outdir results/my_phage --output results/my_phage_safety_summary.tsv
+  bash phageflow/bin/phageflow optional-summary --root results/my_phage --output results/my_phage_optional_tool_summary.tsv
   bash phageflow/bin/phageflow structural-summary --outdir results/my_phage --output results/my_phage_structural_summary.tsv
   bash phageflow/bin/phageflow pangenome-sensitivity --left results/mmseqs_run --right results/rbh_run --output pangenome_sensitivity.tsv
   bash phageflow/bin/phageflow package --outdir results/my_phage --output my_phage_phageflow_package.tar.gz
@@ -413,6 +415,9 @@ case "${cmd}" in
     ;;
   safety-summary)
     python3 "${PHAGEFLOW_DIR}/bin/safety_summary.py" "$@"
+    ;;
+  optional-summary)
+    python3 "${PHAGEFLOW_DIR}/bin/optional_tool_summary.py" "$@"
     ;;
   structural-summary)
     python3 "${PHAGEFLOW_DIR}/bin/structural_summary.py" "$@"

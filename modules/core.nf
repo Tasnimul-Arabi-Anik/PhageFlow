@@ -114,6 +114,7 @@ process BUILD_REPORT {
     path host_rscu
     path crispr_matches
     path crispr_summary
+    path optional_summary
 
     output:
     path "index.html", emit: html
@@ -158,6 +159,7 @@ process BUILD_REPORT {
         --host-rscu "${host_rscu}" \
         --crispr-matches "${crispr_matches}" \
         --crispr-summary "${crispr_summary}" \
+        --optional-summary "${optional_summary}" \
         --pangenome-method "${params.pangenome_method}" \
         --output-mode "${params.output_mode}" \
         --min-orf-aa ${params.min_orf_aa} \

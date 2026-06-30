@@ -8,6 +8,7 @@ import tarfile
 from pathlib import Path
 
 from artifact_inventory import collect_artifact_summary, checksum_rows, default_package_files, rows_to_tsv
+from optional_tool_summary import collect_optional_rows, rows_to_tsv as optional_rows_to_tsv
 from safety_summary import collect_safety_rows, rows_to_tsv as safety_rows_to_tsv
 from structural_summary import collect_structural_rows, rows_to_tsv as structural_rows_to_tsv
 
@@ -41,6 +42,17 @@ def main() -> int:
     checksums = checksum_rows(root, files)
     safety_rows = collect_safety_rows(root)
     structural_rows = collect_structural_rows(root)
+    optional_rows = collect_optional_rows(
+        samplesheet=None,
+        root=root,
+        checkv_artifacts=[],
+        pharokka_artifacts=[],
+        genomad_artifacts=[],
+        genomad_logs=[],
+        phold_artifacts=[],
+        phold_logs=[],
+        clinker_artifacts=[],
+    )
     summary["safety_screen_summary"] = {
         "rows": len(safety_rows),
         "statuses": sorted({row["status"] for row in safety_rows}),
@@ -48,6 +60,11 @@ def main() -> int:
     summary["structural_annotation_summary"] = {
         "rows": len(structural_rows),
         "statuses": sorted({row["status"] for row in structural_rows}),
+    }
+    summary["optional_tool_summary"] = {
+        "rows": len(optional_rows),
+        "statuses": sorted({row["status"] for row in optional_rows}),
+        "available_tools": sorted({row["tool"] for row in optional_rows if row["status"] == "available"}),
     }
     prefix = "phageflow_package"
 
@@ -59,6 +76,7 @@ def main() -> int:
         add_text(tar, f"{prefix}/phageflow_package_checksums.tsv", rows_to_tsv(checksums, ["relative_path", "bytes", "sha256"]))
         add_text(tar, f"{prefix}/phageflow_safety_summary.tsv", safety_rows_to_tsv(safety_rows))
         add_text(tar, f"{prefix}/phageflow_structural_summary.tsv", structural_rows_to_tsv(structural_rows))
+        add_text(tar, f"{prefix}/phageflow_optional_tool_summary.tsv", optional_rows_to_tsv(optional_rows))
 
     print(f"PhageFlow package written: {output}")
     print(f"Packaged files: {len(files)}")

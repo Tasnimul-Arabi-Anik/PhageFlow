@@ -208,3 +208,44 @@ Use the HTML output interactively and export SVG/other static formats if journal
 EOF
     """
 }
+
+process OPTIONAL_TOOL_SUMMARY {
+    tag "optional_tool_summary"
+    publishDir "${params.outdir}/05_optional/summary", mode: 'copy'
+
+    input:
+    path samplesheet
+    path checkv_artifacts
+    path pharokka_artifacts
+    path genomad_artifacts
+    path genomad_logs
+    path phold_artifacts
+    path phold_logs
+    path clinker_artifacts
+
+    output:
+    path "optional_tool_summary.tsv", emit: summary
+    path "optional_tool_summary.json", emit: summary_json
+
+    script:
+    def checkvArgs = checkv_artifacts.collect { "--checkv-artifact ${it}" }.join(' ')
+    def pharokkaArgs = pharokka_artifacts.collect { "--pharokka-artifact ${it}" }.join(' ')
+    def genomadArgs = genomad_artifacts.collect { "--genomad-artifact ${it}" }.join(' ')
+    def genomadLogArgs = genomad_logs.collect { "--genomad-log ${it}" }.join(' ')
+    def pholdArgs = phold_artifacts.collect { "--phold-artifact ${it}" }.join(' ')
+    def pholdLogArgs = phold_logs.collect { "--phold-log ${it}" }.join(' ')
+    def clinkerArgs = clinker_artifacts.collect { "--clinker-artifact ${it}" }.join(' ')
+    """
+    python3 ${projectDir}/bin/optional_tool_summary.py \
+        --samplesheet "${samplesheet}" \
+        ${checkvArgs} \
+        ${pharokkaArgs} \
+        ${genomadArgs} \
+        ${genomadLogArgs} \
+        ${pholdArgs} \
+        ${pholdLogArgs} \
+        ${clinkerArgs} \
+        --output optional_tool_summary.tsv \
+        --summary-json optional_tool_summary.json
+    """
+}

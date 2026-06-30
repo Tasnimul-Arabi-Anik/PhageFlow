@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from artifact_inventory import collect_artifact_summary
+from optional_tool_summary import collect_optional_rows, summarize_rows as summarize_optional_rows
 from safety_summary import collect_safety_rows, summarize_safety_rows
 from structural_summary import collect_structural_rows, summarize_structural_rows
 
@@ -23,6 +24,19 @@ def main() -> int:
     summary = collect_artifact_summary(args.outdir)
     summary["safety_screen_summary"] = summarize_safety_rows(collect_safety_rows(args.outdir))
     summary["structural_annotation_summary"] = summarize_structural_rows(collect_structural_rows(args.outdir))
+    summary["optional_tool_summary"] = summarize_optional_rows(
+        collect_optional_rows(
+            samplesheet=None,
+            root=args.outdir,
+            checkv_artifacts=[],
+            pharokka_artifacts=[],
+            genomad_artifacts=[],
+            genomad_logs=[],
+            phold_artifacts=[],
+            phold_logs=[],
+            clinker_artifacts=[],
+        )
+    )
     text = json.dumps(summary, sort_keys=True, separators=(",", ":")) if args.compact else json.dumps(summary, indent=2)
     text += "\n"
     if args.output:

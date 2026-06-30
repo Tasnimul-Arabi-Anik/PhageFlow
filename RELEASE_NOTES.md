@@ -43,3 +43,10 @@ Release polish:
 - Added GitHub issue templates and pull request checklist.
 - Clarified README status so `v0.1.0-validated` is the first strict-validation milestone and `v0.2.0-dev` is the current development state.
 - Added `docs/v0.3_analysis_roadmap.md` ranking future optional-analysis additions without copying whole external pipelines.
+
+v0.3 priority-1 increment:
+
+- Added `phageflow optional-summary` and `bin/optional_tool_summary.py` for conservative CheckV/Pharokka/geNomad/Phold/clinker artifact summaries.
+- Added `optional_tool_summary.tsv` to new reports, report HTML/Markdown, runtime summaries, validation manifest, important-files manifest, and claim-evidence matrix.
+- Added optional-summary integration to `summarize` and `package`.
+- Extended validator coverage so expected CheckV/Pharokka/geNomad/Phold/clinker modules also require report-level optional summary rows; added `--expect-*-summary` flags for report-only checks.
