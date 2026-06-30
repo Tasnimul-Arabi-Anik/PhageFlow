@@ -8,6 +8,7 @@ from pathlib import Path
 from artifact_inventory import collect_artifact_summary
 from optional_tool_metrics import collect_optional_metric_rows, summarize_metric_rows
 from optional_tool_summary import collect_optional_rows, summarize_rows as summarize_optional_rows
+from pangenome_sensitivity import report_import_summary
 from safety_summary import collect_safety_rows, summarize_safety_rows
 from structural_summary import collect_structural_rows, summarize_structural_rows
 
@@ -61,6 +62,7 @@ def main() -> int:
             clinker_artifacts=[],
         )
     )
+    summary["pangenome_sensitivity_summary"] = report_import_summary(args.outdir)
     text = json.dumps(summary, sort_keys=True, separators=(",", ":")) if args.compact else json.dumps(summary, indent=2)
     text += "\n"
     if args.output:

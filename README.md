@@ -110,7 +110,9 @@ Compare pangenome summaries from two completed runs:
 bash bin/phageflow pangenome-sensitivity \
   --left results/phage_cohort_mmseqs \
   --right results/phage_cohort_rbh \
-  --output pangenome_sensitivity.tsv
+  --output pangenome_sensitivity.tsv \
+  --summary-output pangenome_sensitivity_summary.tsv \
+  --import-to-report results/phage_cohort_mmseqs
 ```
 
 ## Inputs
@@ -349,7 +351,7 @@ bash bin/phageflow structural-summary --outdir phageflow_validation_mmseqs --out
 bash bin/phageflow package --outdir phageflow_validation_mmseqs --output /tmp/phageflow_package.tar.gz
 ```
 
-`summarize` reports sanitized artifact counts, anonymous TSV/figure IDs, file sizes, checksums, validation-manifest status, optional-screen artifact status, optional-tool artifact status, optional-tool metric status, structural-artifact status, and generic PASS/FAIL/WARN/ERROR marker counts. `safety-summary` reports optional safety-related artifact presence and row counts without printing feature names. `optional-summary` reports optional-tool artifact presence, table shapes, sizes, and checksums without printing annotation values. `optional-metrics` reports compact high-level metric counts without printing annotation, taxonomy, host-prediction, or feature values. `structural-summary` reports structural-annotation artifact classes, table shapes, sizes, and checksums without printing annotation values. `package` creates a report/QA archive with relative paths, package checksums, optional-screen, optional-tool, optional-metric, and structural summaries, and the sanitized artifact summary.
+`summarize` reports sanitized artifact counts, anonymous TSV/figure IDs, file sizes, checksums, validation-manifest status, optional-screen artifact status, optional-tool artifact status, optional-tool metric status, imported pangenome-sensitivity status, structural-artifact status, and generic PASS/FAIL/WARN/ERROR marker counts. `safety-summary` reports optional safety-related artifact presence and row counts without printing feature names. `optional-summary` reports optional-tool artifact presence, table shapes, sizes, and checksums without printing annotation values. `optional-metrics` reports compact high-level metric counts without printing annotation, taxonomy, host-prediction, or feature values. `structural-summary` reports structural-annotation artifact classes, table shapes, sizes, and checksums without printing annotation values. `package` creates a report/QA archive with relative paths, package checksums, optional-screen, optional-tool, optional-metric, pangenome-sensitivity, and structural summaries, and the sanitized artifact summary.
 
 Compare completed pangenome runs:
 
@@ -357,10 +359,12 @@ Compare completed pangenome runs:
 bash bin/phageflow pangenome-sensitivity \
   --left phageflow_validation_mmseqs \
   --right phageflow_validation_rbh \
-  --output /tmp/phageflow_pangenome_sensitivity.tsv
+  --output /tmp/phageflow_pangenome_sensitivity.tsv \
+  --summary-output /tmp/phageflow_pangenome_sensitivity_summary.tsv \
+  --import-to-report phageflow_validation_mmseqs
 ```
 
-This compares summary metrics only and does not interpret biological meaning.
+This compares summary metrics only and does not interpret biological meaning. When `--import-to-report` is supplied, PhageFlow writes `99_report/tables/pangenome_sensitivity.tsv`, `99_report/tables/pangenome_sensitivity_summary.tsv`, and `99_report/pangenome_sensitivity_report.md` into the selected completed run; `summarize` and `package` then include the imported sensitivity status.
 
 ## Containers and Conda
 

@@ -23,7 +23,7 @@ Usage:
   bin/phageflow optional-summary --root PATH [--output optional_tool_summary.tsv]
   bin/phageflow optional-metrics --root PATH [--output optional_tool_metrics.tsv]
   bin/phageflow structural-summary --outdir PATH [--output structural_summary.tsv]
-  bin/phageflow pangenome-sensitivity --left RUN_A --right RUN_B [--output comparison.tsv]
+  bin/phageflow pangenome-sensitivity --left RUN_A --right RUN_B [--output comparison.tsv] [--import-to-report RUN_A]
   bin/phageflow package --outdir PATH [--output package.tar.gz] [--include-logs]
   bin/phageflow container-smoke
   bin/phageflow run [--env-prefix PATH] [nextflow args]
@@ -46,7 +46,7 @@ Examples:
   bash bin/phageflow optional-summary --root results/my_phage --output results/my_phage_optional_tool_summary.tsv
   bash bin/phageflow optional-metrics --root results/my_phage --output results/my_phage_optional_tool_metrics.tsv
   bash bin/phageflow structural-summary --outdir results/my_phage --output results/my_phage_structural_summary.tsv
-  bash bin/phageflow pangenome-sensitivity --left results/mmseqs_run --right results/rbh_run --output pangenome_sensitivity.tsv
+  bash bin/phageflow pangenome-sensitivity --left results/mmseqs_run --right results/rbh_run --output pangenome_sensitivity.tsv --import-to-report results/mmseqs_run
   bash bin/phageflow package --outdir results/my_phage --output my_phage_phageflow_package.tar.gz
   bash bin/phageflow container-smoke
   bash bin/phageflow install --with publication

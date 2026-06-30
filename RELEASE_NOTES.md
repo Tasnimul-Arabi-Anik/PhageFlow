@@ -8,6 +8,7 @@ v0.4 analysis-expansion first pass:
 - Added lightweight genome architecture metrics: GC/AT skew, homopolymer/N-run lengths, ORF strand balance, ORF density, and ORF length summaries.
 - Added a disabled-by-default iPHoP wrapper and optional-artifact validation contract for database-backed host-prediction evidence.
 - Added `optional_tool_metrics.tsv` and `phageflow optional-metrics` for compact high-level optional-tool metric counts without printing annotation, taxonomy, host-prediction, or feature values.
+- Added report-import support for completed-run pangenome sensitivity comparisons, including compact summary tables and package/summarize visibility.
 
 ## v0.3.0-validated - 2026-07-01
 

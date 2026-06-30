@@ -179,7 +179,9 @@ If you run both MMseqs and RBH pangenome modes, compare their completed summarie
 bash bin/phageflow pangenome-sensitivity \
   --left results/my_phage_cohort_mmseqs \
   --right results/my_phage_cohort_rbh \
-  --output pangenome_sensitivity.tsv
+  --output pangenome_sensitivity.tsv \
+  --summary-output pangenome_sensitivity_summary.tsv \
+  --import-to-report results/my_phage_cohort_mmseqs
 ```
 
 Expected output:

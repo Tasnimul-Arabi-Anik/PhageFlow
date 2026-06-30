@@ -172,10 +172,12 @@ Run the MMseqs and RBH modes into separate output directories, then compare thei
 bash bin/phageflow pangenome-sensitivity \
   --left results/phage_cohort_mmseqs \
   --right results/phage_cohort_rbh \
-  --output results/pangenome_sensitivity.tsv
+  --output results/pangenome_sensitivity.tsv \
+  --summary-output results/pangenome_sensitivity_summary.tsv \
+  --import-to-report results/phage_cohort_mmseqs
 ```
 
-This reports metric deltas only. It is intended for method-sensitivity QA and does not decide which method is biologically correct.
+This reports metric deltas only. It is intended for method-sensitivity QA and does not decide which method is biologically correct. The `--import-to-report` option copies the comparison plus a compact summary into `99_report/tables/` and adds a Markdown sensitivity note to the selected completed report.
 
 ## Completed-Run Structural Artifact Summary
 
