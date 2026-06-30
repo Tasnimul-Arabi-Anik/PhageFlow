@@ -50,3 +50,4 @@ v0.3 priority-1 increment:
 - Added `optional_tool_summary.tsv` to new reports, report HTML/Markdown, runtime summaries, validation manifest, important-files manifest, and claim-evidence matrix.
 - Added optional-summary integration to `summarize` and `package`.
 - Extended validator coverage so expected CheckV/Pharokka/geNomad/Phold/clinker modules also require report-level optional summary rows; added `--expect-*-summary` flags for report-only checks.
+- Reviewed Clinker static export feasibility and kept native HTML/alignment artifacts as the validated contract; automated SVG/PNG/PDF export remains deferred until a stable upstream CLI or separate browser-rendering contract is available.
