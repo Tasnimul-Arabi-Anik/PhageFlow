@@ -85,6 +85,18 @@ def termini_heuristics(contigs: list[str]) -> dict[str, str | int]:
     }
 
 
+def longest_run(sequence: str, base: str) -> int:
+    best = 0
+    current = 0
+    for char in sequence:
+        if char == base:
+            current += 1
+            best = max(best, current)
+        else:
+            current = 0
+    return best
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Calculate FASTA assembly statistics.")
     parser.add_argument("--sample-id", required=True)
@@ -94,6 +106,10 @@ def main() -> int:
 
     lengths = []
     gc = 0
+    a_count = 0
+    c_count = 0
+    g_count = 0
+    t_count = 0
     ambiguous = 0
     total = 0
     contig_sequences = []
@@ -101,8 +117,15 @@ def main() -> int:
         contig_sequences.append(sequence)
         lengths.append(len(sequence))
         total += len(sequence)
+        a_count += sequence.count("A")
+        c_count += sequence.count("C")
+        g_count += sequence.count("G")
+        t_count += sequence.count("T")
         gc += sequence.count("G") + sequence.count("C")
         ambiguous += sum(1 for base in sequence if base not in {"A", "C", "G", "T"})
+    cleaned_contigs = [clean_sequence(sequence) for sequence in contig_sequences]
+    gc_denom = g_count + c_count
+    at_denom = a_count + t_count
 
     row = {
         "sample_id": args.sample_id,
@@ -111,7 +134,14 @@ def main() -> int:
         "max_contig_bp": max(lengths) if lengths else 0,
         "n50_bp": n50(lengths),
         "gc_pct": f"{(100 * gc / total):.3f}" if total else "0.000",
+        "gc_skew": f"{((g_count - c_count) / gc_denom):.6f}" if gc_denom else "0.000000",
+        "at_skew": f"{((a_count - t_count) / at_denom):.6f}" if at_denom else "0.000000",
         "ambiguous_pct": f"{(100 * ambiguous / total):.3f}" if total else "0.000",
+        "longest_n_run_bp": max((longest_run(sequence, "N") for sequence in contig_sequences), default=0),
+        "longest_homopolymer_bp": max(
+            (longest_run(sequence, base) for sequence in cleaned_contigs for base in "ACGT"),
+            default=0,
+        ),
         **termini_heuristics(contig_sequences),
     }
 

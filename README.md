@@ -261,8 +261,8 @@ Supported values:
 Outputs are written under `--outdir`:
 
 - `00_inputs/`: normalized samplesheet and input validation summary.
-- `01_qc/fasta_stats/`: genome length, contig count, GC, N50, ambiguous-base summary, and conservative exact-terminal-repeat heuristics.
-- `02_annotation/lightweight_orfs/`: dependency-light ORF predictions for smoke tests and scaffolding.
+- `01_qc/fasta_stats/`: genome length, contig count, GC, GC/AT skew, N50, ambiguous-base summary, homopolymer/N-run metrics, and conservative exact-terminal-repeat heuristics.
+- `02_annotation/lightweight_orfs/`: dependency-light ORF predictions plus coding-density, strand-balance, ORF-density, and ORF-length summaries for smoke tests and scaffolding.
 - `03_codon_usage/`: codon counts and genome-level coding summaries.
 - `04_comparative/cohort_similarity/`: exact duplicate checks and k-mer Jaccard similarity.
 - `04_comparative/intergenomic_similarity/`: BLASTN identity, reciprocal aligned-fraction, conservative similarity-score, similarity matrix, distance matrix, and method note.

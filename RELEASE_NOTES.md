@@ -5,6 +5,7 @@
 v0.4 analysis-expansion first pass:
 
 - Expanded optional summaries to include tRNAscan-SE, BACPHLIP, and ABRicate artifacts while keeping optional modules disabled by default.
+- Added lightweight genome architecture metrics: GC/AT skew, homopolymer/N-run lengths, ORF strand balance, ORF density, and ORF length summaries.
 
 ## v0.3.0-validated - 2026-07-01
 

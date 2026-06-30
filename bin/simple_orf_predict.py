@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import statistics
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -155,16 +156,42 @@ def main() -> int:
             )
 
     coding_bp = covered_bases(all_orfs)
+    plus_orfs = sum(1 for orf in all_orfs if orf.strand == "+")
+    minus_orfs = sum(1 for orf in all_orfs if orf.strand == "-")
+    aa_lengths = [max((len(orf.nt) // 3) - 1, 0) for orf in all_orfs]
+    mean_aa = statistics.mean(aa_lengths) if aa_lengths else 0
+    median_aa = statistics.median(aa_lengths) if aa_lengths else 0
     with args.summary.open("w", newline="") as handle:
         writer = csv.writer(handle, delimiter="\t", lineterminator="\n")
-        writer.writerow(["sample_id", "orfs", "coding_bp", "genome_bp", "coding_density_pct", "min_orf_aa"])
+        writer.writerow(
+            [
+                "sample_id",
+                "orfs",
+                "plus_strand_orfs",
+                "minus_strand_orfs",
+                "coding_bp",
+                "genome_bp",
+                "coding_density_pct",
+                "orfs_per_kb",
+                "mean_orf_aa",
+                "median_orf_aa",
+                "longest_orf_aa",
+                "min_orf_aa",
+            ]
+        )
         writer.writerow(
             [
                 args.sample_id,
                 len(all_orfs),
+                plus_orfs,
+                minus_orfs,
                 coding_bp,
                 genome_bp,
                 f"{(100 * coding_bp / genome_bp):.3f}" if genome_bp else "0.000",
+                f"{(1000 * len(all_orfs) / genome_bp):.3f}" if genome_bp else "0.000",
+                f"{mean_aa:.3f}",
+                f"{median_aa:.3f}",
+                max(aa_lengths) if aa_lengths else 0,
                 args.min_aa,
             ]
         )
@@ -173,4 +200,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
