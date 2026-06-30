@@ -33,6 +33,7 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     pharokka = tmp_path / "sample_a.pharokka"
     genomad = tmp_path / "sample_a.genomad"
     phold = tmp_path / "sample_a.phold"
+    iphop = tmp_path / "sample_a.iphop"
     clinker = tmp_path / "clinker_synteny.html"
     gbk_files = tmp_path / "gbk_files.txt"
 
@@ -43,6 +44,7 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     write(pharokka / "sample_a_cds_functions.tsv", "gene\tfunction\nx\ty\n")
     write(genomad / "sample_a_summary.tsv", "seq_name\tlength\ncontig1\t1000\n")
     write(phold / "sample_a_confidence.tsv", "cds\tconfidence\ncds1\t0.9\n")
+    write(iphop / "Host_prediction_to_genus_m90.csv", "Virus,Host genus,Score\ncontig1,host_a,95\n")
     write(clinker, "<html><body>ok</body></html>\n")
     write(gbk_files, "sample_a.gbk\nsample_b.gbk\n")
 
@@ -68,6 +70,8 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
             str(genomad),
             "--phold-artifact",
             str(phold),
+            "--iphop-artifact",
+            str(iphop),
             "--clinker-artifact",
             str(clinker),
             "--clinker-artifact",
@@ -83,7 +87,7 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     rows = list(csv.DictReader(output.open(), delimiter="\t"))
     by_tool_sample = {(row["tool"], row["sample_id"]): row for row in rows}
 
-    for tool in ["trnascan", "bacphlip", "abricate", "checkv", "pharokka", "genomad", "phold"]:
+    for tool in ["trnascan", "bacphlip", "abricate", "checkv", "pharokka", "genomad", "phold", "iphop"]:
         assert by_tool_sample[(tool, "sample_a")]["status"] == "available"
         assert by_tool_sample[(tool, "sample_b")]["status"] == "not_run"
 
@@ -99,12 +103,13 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
         "checkv",
         "clinker",
         "genomad",
+        "iphop",
         "pharokka",
         "phold",
         "trnascan",
     ]
-    assert summary["status_counts"]["available"] == 8
-    assert summary["status_counts"]["not_run"] == 7
+    assert summary["status_counts"]["available"] == 9
+    assert summary["status_counts"]["not_run"] == 8
 
 
 def main() -> int:

@@ -50,7 +50,9 @@ OPTIONAL_GROUPS = {
     "publication": ["trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "clinker"],
     "structure": ["phold"],
     "host": ["host"],
-    "all": ["trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "clinker", "host"],
+    "host_prediction": ["iphop"],
+    "host-prediction": ["iphop"],
+    "all": ["trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "clinker", "host", "iphop"],
 }
 
 OPTIONAL_TOOLS = {
@@ -62,6 +64,7 @@ OPTIONAL_TOOLS = {
     "genomad": ["genomad"],
     "phold": ["phold"],
     "clinker": ["clinker"],
+    "iphop": ["iphop"],
     "host": ["prodigal", "minced"],
 }
 
@@ -287,6 +290,10 @@ def check_optional_module(
         directory = optional_dir / "phold"
         ok &= check_glob_count(results, "optional_output:phold_dirs", directory, "*.phold", sample_count)
         ok &= check_glob_count(results, "optional_output:phold_logs", directory, "*.phold.log", sample_count)
+    elif module == "iphop":
+        directory = optional_dir / "iphop"
+        ok &= check_glob_count(results, "optional_output:iphop_dirs", directory, "*.iphop", sample_count)
+        ok &= check_glob_count(results, "optional_output:iphop_logs", directory, "*.iphop.log", sample_count)
     elif module == "clinker":
         directory = optional_dir / "clinker_synteny"
         ok &= check_file(results, "optional_output:clinker_html", directory / "clinker_synteny.html")
@@ -419,12 +426,12 @@ def main() -> int:
     parser.add_argument("--expect-marker-tree", action="store_true", help="Require completed marker-gene phylogeny outputs and TIFF tree figures.")
     parser.add_argument("--expect-host-adaptation", action="store_true", help="Require nonempty host codon-adaptation/RSCU outputs and host-adaptation TIFF figure.")
     parser.add_argument("--expect-crispr-hits", action="store_true", help="Require at least one CRISPR spacer/protospacer match row.")
-    parser.add_argument("--expect-optional", action="append", default=[], help="Optional module or comma-separated modules/groups expected in 05_optional. Groups: lite, publication, structure, host, all.")
+    parser.add_argument("--expect-optional", action="append", default=[], help="Optional module or comma-separated modules/groups expected in 05_optional. Groups: lite, publication, structure, host, host_prediction, all.")
     parser.add_argument("--expect-lite-optionals", action="store_true", help="Require tRNAscan-SE, BACPHLIP, and ABRicate outputs.")
     parser.add_argument("--expect-publication-optionals", action="store_true", help="Require tRNAscan-SE, BACPHLIP, CheckV, ABRicate, Pharokka, geNomad, and clinker outputs.")
-    for module in ["trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "clinker"]:
+    for module in ["trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "clinker", "iphop"]:
         parser.add_argument(f"--expect-{module}", action="store_true", help=f"Require {module} optional outputs and software-version records.")
-    for module in ["checkv", "pharokka", "genomad", "phold", "clinker"]:
+    for module in ["checkv", "pharokka", "genomad", "phold", "clinker", "iphop"]:
         parser.add_argument(f"--expect-{module}-summary", action="store_true", help=f"Require {module} rows in 99_report/tables/optional_tool_summary.tsv.")
     args = parser.parse_args()
 
@@ -499,10 +506,10 @@ def main() -> int:
                     ok &= check_software(results, versions, tool)
             else:
                 ok &= check_optional_module(results, outdir, module, sample_count, versions)
-                if module in {"trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "clinker"}:
+                if module in {"trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "clinker", "iphop"}:
                     ok &= check_optional_summary_module(results, tables_dir, module, sample_count)
 
-    expected_summary_modules = [module for module in ["checkv", "pharokka", "genomad", "phold", "clinker"] if getattr(args, f"expect_{module}_summary")]
+    expected_summary_modules = [module for module in ["checkv", "pharokka", "genomad", "phold", "clinker", "iphop"] if getattr(args, f"expect_{module}_summary")]
     if expected_summary_modules:
         samples = read_samples(normalized_samplesheet)
         validation_values = read_key_value(outdir / "00_inputs" / "validation_summary.tsv")

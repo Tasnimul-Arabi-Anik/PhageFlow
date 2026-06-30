@@ -25,7 +25,7 @@ FIELDS = [
     "limitation",
 ]
 
-SAMPLE_TOOLS = ("trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold")
+SAMPLE_TOOLS = ("trnascan", "bacphlip", "checkv", "abricate", "pharokka", "genomad", "phold", "iphop")
 TOOL_SUFFIXES = {
     "trnascan": ".trnascan.tsv",
     "bacphlip": ".bacphlip.log",
@@ -34,6 +34,7 @@ TOOL_SUFFIXES = {
     "pharokka": ".pharokka",
     "genomad": ".genomad",
     "phold": ".phold",
+    "iphop": ".iphop",
 }
 LIMITATIONS = {
     "trnascan": "tRNAscan-SE artifact summary only; tRNA calls are not interpreted.",
@@ -43,6 +44,7 @@ LIMITATIONS = {
     "pharokka": "Pharokka artifact summary only; gene or function annotations are not printed or interpreted.",
     "genomad": "geNomad artifact summary only; classification and taxonomy values are not interpreted.",
     "phold": "Phold artifact summary only; structural annotation values are not printed or interpreted.",
+    "iphop": "iPHoP artifact summary only; host-prediction values are not interpreted as host-range evidence.",
     "clinker": "clinker synteny artifact summary only; gene-order visualization is not interpreted.",
 }
 
@@ -116,6 +118,8 @@ def table_type(path: Path) -> str:
         return "summary_table"
     if "confidence" in name and suffix in {".tsv", ".csv"}:
         return "confidence_table"
+    if "host" in name and suffix in {".tsv", ".csv"}:
+        return "host_prediction_table"
     if suffix in {".gb", ".gbk"}:
         return "genbank"
     if suffix.startswith(".gff"):
@@ -171,6 +175,19 @@ def preferred_phold_artifact(path: Path, log_path: Path | None = None) -> Path |
     return first_file(path, patterns) or log_path
 
 
+def preferred_iphop_artifact(path: Path, log_path: Path | None = None) -> Path | None:
+    patterns = [
+        "**/*Host_prediction*.csv",
+        "**/*host*prediction*.csv",
+        "**/*host*.csv",
+        "**/*host*.tsv",
+        "**/*.csv",
+        "**/*.tsv",
+        "**/*.log",
+    ]
+    return first_file(path, patterns) or log_path
+
+
 def first_file(path: Path, patterns: list[str]) -> Path | None:
     if path.is_file():
         return path
@@ -212,6 +229,8 @@ def summarize_sample_tool(tool: str, sample_id: str, artifact: Path | None, inde
         primary = preferred_genomad_artifact(artifact, log_path)
     elif tool == "phold":
         primary = preferred_phold_artifact(artifact, log_path)
+    elif tool == "iphop":
+        primary = preferred_iphop_artifact(artifact, log_path)
     else:
         primary = first_file(artifact, ["*"])
 
@@ -327,6 +346,8 @@ def collect_optional_rows(
     genomad_logs: list[Path],
     phold_artifacts: list[Path],
     phold_logs: list[Path],
+    iphop_artifacts: list[Path],
+    iphop_logs: list[Path],
     clinker_artifacts: list[Path],
 ) -> list[dict[str, str]]:
     root = root.resolve() if root else None
@@ -339,10 +360,12 @@ def collect_optional_rows(
         "pharokka": index_sample_artifacts(pharokka_artifacts or (root_artifacts(root, "pharokka") if root else []), "pharokka"),
         "genomad": index_sample_artifacts(genomad_artifacts or (root_artifacts(root, "genomad") if root else []), "genomad"),
         "phold": index_sample_artifacts(phold_artifacts or (root_artifacts(root, "phold") if root else []), "phold"),
+        "iphop": index_sample_artifacts(iphop_artifacts or (root_artifacts(root, "iphop") if root else []), "iphop"),
     }
     log_artifacts = {
         "genomad": index_sample_artifacts(genomad_logs, "genomad"),
         "phold": index_sample_artifacts(phold_logs, "phold"),
+        "iphop": index_sample_artifacts(iphop_logs, "iphop"),
     }
     if not samples:
         detected = set()
@@ -401,6 +424,8 @@ def main() -> int:
     parser.add_argument("--genomad-log", action="append", default=[], type=Path)
     parser.add_argument("--phold-artifact", action="append", default=[], type=Path)
     parser.add_argument("--phold-log", action="append", default=[], type=Path)
+    parser.add_argument("--iphop-artifact", action="append", default=[], type=Path)
+    parser.add_argument("--iphop-log", action="append", default=[], type=Path)
     parser.add_argument("--clinker-artifact", action="append", default=[], type=Path)
     parser.add_argument("--output", default=None, type=Path, help="Optional TSV output path. Defaults to stdout.")
     parser.add_argument("--summary-json", default=None, type=Path, help="Optional JSON summary output path.")
@@ -421,6 +446,8 @@ def main() -> int:
         genomad_logs=args.genomad_log,
         phold_artifacts=args.phold_artifact,
         phold_logs=args.phold_log,
+        iphop_artifacts=args.iphop_artifact,
+        iphop_logs=args.iphop_log,
         clinker_artifacts=args.clinker_artifact,
     )
     text = rows_to_tsv(rows)

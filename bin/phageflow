@@ -34,7 +34,8 @@ Optional install groups:
   structure   Phold
   phylogeny   MAFFT, IQ-TREE2, trimAl, Biopython
   host        Prodigal and minced for host-context enrichment
-  all         publication + structure + phylogeny + host
+  host-prediction iPHoP for optional database-backed host prediction
+  all         publication + structure + phylogeny + host + host-prediction
 
 Examples:
   bash bin/phageflow test
@@ -56,7 +57,7 @@ Behavior:
   If required tools are missing, the launcher creates a removable conda environment at
   .phageflow-env by default, or at PHAGEFLOW_ENV_PREFIX / --env-prefix.
   Optional groups install executables only; large databases such as CheckV, Pharokka,
-  geNomad, and Phold databases still need to be downloaded/provided separately.
+  geNomad, Phold, and iPHoP databases still need to be downloaded/provided separately.
 EOF
 }
 
@@ -212,13 +213,16 @@ append_group_packages() {
     host)
       OPTIONAL_PACKAGES+=(prodigal minced)
       ;;
+    host-prediction|host_prediction)
+      OPTIONAL_PACKAGES+=(iphop)
+      ;;
     all)
-      OPTIONAL_PACKAGES+=(trnascan-se bacphlip abricate checkv pharokka genomad clinker phold mafft iqtree trimal biopython prodigal minced)
+      OPTIONAL_PACKAGES+=(trnascan-se bacphlip abricate checkv pharokka genomad clinker phold mafft iqtree trimal biopython prodigal minced iphop)
       ;;
     "")
       ;;
     *)
-      echo "ERROR: unknown optional install group '${group}'. Use lite, publication, structure, phylogeny, host, or all." >&2
+      echo "ERROR: unknown optional install group '${group}'. Use lite, publication, structure, phylogeny, host, host-prediction, or all." >&2
       return 2
       ;;
   esac
@@ -319,13 +323,16 @@ optional_tools_for_groups() {
       host)
         OPTIONAL_TOOLS+=(prodigal minced)
         ;;
+      host-prediction|host_prediction)
+        OPTIONAL_TOOLS+=(iphop)
+        ;;
       all)
-        OPTIONAL_TOOLS+=(tRNAscan-SE bacphlip abricate checkv pharokka.py genomad clinker phold mafft iqtree2 iqtree trimal prodigal minced)
+        OPTIONAL_TOOLS+=(tRNAscan-SE bacphlip abricate checkv pharokka.py genomad clinker phold mafft iqtree2 iqtree trimal prodigal minced iphop)
         ;;
       "")
         ;;
       *)
-        echo "ERROR: unknown optional group '${group}'. Use lite, publication, structure, phylogeny, host, or all." >&2
+        echo "ERROR: unknown optional group '${group}'. Use lite, publication, structure, phylogeny, host, host-prediction, or all." >&2
         return 2
         ;;
     esac
@@ -357,6 +364,7 @@ print_optional_versions() {
       trimal) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
       prodigal) echo "${tool}: $(version_first_line "${tool}" -v)" ;;
       minced) echo "${tool}: $(version_first_line "${tool}" -h)" ;;
+      iphop) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
       *) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
     esac
   done

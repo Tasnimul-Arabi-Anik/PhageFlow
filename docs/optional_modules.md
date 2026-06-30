@@ -17,6 +17,7 @@ bash bin/phageflow install --with publication
 bash bin/phageflow install --with structure
 bash bin/phageflow install --with phylogeny
 bash bin/phageflow install --with host
+bash bin/phageflow install --with host-prediction
 bash bin/phageflow install --with all
 ```
 
@@ -27,9 +28,10 @@ Groups:
 - `structure`: Phold.
 - `phylogeny`: MAFFT, IQ-TREE, trimAl, and Biopython for marker-gene trees.
 - `host`: Prodigal and minced for optional host-context enrichment.
-- `all`: `publication` plus `structure`, `phylogeny`, and `host`.
+- `host-prediction`: iPHoP for optional database-backed host prediction.
+- `all`: `publication` plus `structure`, `phylogeny`, `host`, and `host-prediction`.
 
-The installer handles executables only. Database-heavy tools still require user-provided database paths, for example `--checkv_db`, `--pharokka_db`, and `--genomad_db`.
+The installer handles executables only. Database-heavy tools still require user-provided database paths, for example `--checkv_db`, `--pharokka_db`, `--genomad_db`, and `--iphop_db`.
 
 ## Doctor Checks
 
@@ -37,6 +39,7 @@ The installer handles executables only. Database-heavy tools still require user-
 bash bin/phageflow doctor --with publication
 bash bin/phageflow doctor --with phylogeny
 bash bin/phageflow doctor --with host
+bash bin/phageflow doctor --with host-prediction
 bash bin/phageflow doctor --with all
 ```
 
@@ -79,6 +82,14 @@ bash bin/phageflow validate \
   --outdir results/phage_host_context \
   --expect-host-adaptation \
   --expect-crispr-hits
+```
+
+Validate optional iPHoP host-prediction artifacts after a run with `--run_iphop true --iphop_db ...`:
+
+```bash
+bash bin/phageflow validate \
+  --outdir results/phage_iphop \
+  --expect-iphop
 ```
 
 You can also validate individual modules:
@@ -132,7 +143,7 @@ bash bin/phageflow optional-summary \
   --summary-json results/my_run_optional_tool_summary.json
 ```
 
-This table summarizes tRNAscan-SE, BACPHLIP, ABRicate, CheckV, Pharokka, geNomad, Phold, and clinker artifact availability, primary artifact class, table row/column counts, file counts, sizes, and checksums. It intentionally does not print annotation values or make biological conclusions.
+This table summarizes tRNAscan-SE, BACPHLIP, ABRicate, CheckV, Pharokka, geNomad, Phold, clinker, and iPHoP artifact availability, primary artifact class, table row/column counts, file counts, sizes, and checksums. It intentionally does not print annotation values, host-prediction values, or make biological conclusions.
 
 ## Completed-Run Pangenome Sensitivity Summary
 

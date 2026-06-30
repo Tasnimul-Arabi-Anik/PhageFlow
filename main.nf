@@ -2,7 +2,7 @@ nextflow.enable.dsl = 2
 
 include { VALIDATE_SAMPLESHEET; FASTA_STATS; SIMPLE_ORF_PREDICT; CODON_USAGE; BUILD_REPORT } from './modules/core'
 include { COHORT_SIMILARITY; INTERGENOMIC_SIMILARITY; NO_INTERGENOMIC_SIMILARITY; REFERENCE_CONTEXT; MARKER_PHYLOGENY; NO_MARKER_PHYLOGENY; MMSEQS_PANGENOME; RBH_PANGENOME; NO_PANGENOME; RUN_LEGACY_SNAKEMAKE_PANGENOME } from './modules/comparative'
-include { TRNASCAN; BACPHLIP; CHECKV; ABRICATE; PHAROKKA; GENOMAD; PHOLD; CLINKER_SYNTENY; OPTIONAL_TOOL_SUMMARY } from './modules/optional_tools'
+include { TRNASCAN; BACPHLIP; CHECKV; ABRICATE; PHAROKKA; GENOMAD; PHOLD; CLINKER_SYNTENY; IPHOP; OPTIONAL_TOOL_SUMMARY } from './modules/optional_tools'
 include { HOST_CONTEXT_LIGHT; NO_HOST_CONTEXT } from './modules/host'
 
 def paramEnabled(value) {
@@ -197,6 +197,15 @@ workflow {
         clinker_artifacts_ch = Channel.value([])
     }
 
+    if (paramEnabled(params.run_iphop)) {
+        IPHOP(samples_ch)
+        iphop_artifacts_ch = IPHOP.out.iphop_dir.map { sample_id, iphop_dir -> iphop_dir }.collect()
+        iphop_logs_ch = IPHOP.out.log.map { sample_id, iphop_log -> iphop_log }.collect()
+    } else {
+        iphop_artifacts_ch = Channel.value([])
+        iphop_logs_ch = Channel.value([])
+    }
+
     OPTIONAL_TOOL_SUMMARY(
         VALIDATE_SAMPLESHEET.out.samplesheet,
         trnascan_artifacts_ch,
@@ -208,6 +217,8 @@ workflow {
         genomad_logs_ch,
         phold_artifacts_ch,
         phold_logs_ch,
+        iphop_artifacts_ch,
+        iphop_logs_ch,
         clinker_artifacts_ch
     )
 

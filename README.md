@@ -19,7 +19,7 @@ The v0.2 extension review, roadmap status, and completion audit are preserved in
 
 - Single phage genome characterization: input validation, genome QC, lightweight ORF prediction, codon usage, optional tRNA/lifecycle/quality/taxonomy/annotation/marker-tree modules, and report.
 - Cohort comparative genomics: exact/near-duplicate screening, k-mer similarity, BLASTN intergenomic similarity, optional marker-gene phylogeny, MMseqs pangenome, and conservative RBH-BLASTP pangenome.
-- Optional host context: linked host metadata plus phage-host GC/tetranucleotide composition comparison.
+- Optional host context: linked host metadata plus phage-host GC/tetranucleotide composition comparison, optional spacer matching, and optional iPHoP host-prediction artifacts.
 - PanResistome-style important reporting: `index.html`, high-resolution figures, downloadable key TSVs, software versions, parameters, runtime summary, important-files manifest, and validation manifest.
 
 This workflow only processes existing sequence files and metadata. It does not perform wet-lab design, phage engineering, host-range expansion, synthesis, or virulence enhancement.
@@ -51,7 +51,7 @@ bash bin/phageflow install --with publication
 bash bin/phageflow doctor --with publication
 ```
 
-Optional install groups are `lite`, `publication`, `structure`, `phylogeny`, `host`, and `all`. These install executables only; large databases such as CheckV, Pharokka, geNomad, and Phold databases still need to be provided separately with the relevant workflow parameters.
+Optional install groups are `lite`, `publication`, `structure`, `phylogeny`, `host`, `host-prediction`, and `all`. These install executables only; large databases such as CheckV, Pharokka, geNomad, Phold, and iPHoP databases still need to be provided separately with the relevant workflow parameters.
 
 Run a real phage genome with automatic tool detection/installation:
 
@@ -231,6 +231,19 @@ nextflow run main.nf \
 
 `--run_phold true` and `--run_clinker true` automatically run Pharokka first because both modules need GenBank annotation output. Phold improves functional annotation using protein structural homology, while clinker creates comparative gene-order/synteny visualisations from annotated GenBank files.
 
+Optional database-backed host prediction:
+
+```bash
+bash bin/phageflow install --with host-prediction
+nextflow run main.nf \
+  --input phage_samplesheet.tsv \
+  --run_iphop true \
+  --iphop_db /path/to/iphop_db \
+  --outdir results/phage_iphop
+```
+
+iPHoP outputs are summarized as optional artifacts only. Treat predicted-host evidence as computational context, not host-range proof.
+
 Marker-gene phylogeny from user-supplied marker proteins:
 
 ```bash
@@ -269,14 +282,14 @@ Outputs are written under `--outdir`:
 - `04_comparative/marker_phylogeny/`: marker protein selection, alignments, Newick trees, topology consistency table, provenance table, and method note when enabled.
 - `04_comparative/mmseqs_pangenome/`: default pangenome outputs.
 - `04_comparative/rbh_blastp_pangenome/`: conservative RBH pangenome outputs.
-- `05_optional/`: tRNAscan-SE, BACPHLIP, CheckV, ABRicate, Pharokka, geNomad, Phold, and clinker outputs when enabled.
+- `05_optional/`: tRNAscan-SE, BACPHLIP, CheckV, ABRicate, Pharokka, geNomad, Phold, clinker, and iPHoP outputs when enabled.
 - `06_host_context/`: host-linked nucleotide composition comparison.
 - `99_report/index.html`: HTML dashboard.
 - `99_report/figures/`: PNG, TIFF, PDF, and SVG figures.
 - `99_report/tables/`: key downloadable TSV files.
 - `99_report/tables/claim_evidence_matrix.tsv`: software claim-to-artifact evidence matrix with limitations.
 - `99_report/tables/marker_provenance.tsv`: marker alignment/tree provenance table when marker-tree outputs are enabled.
-- `99_report/tables/optional_tool_summary.tsv`: optional tRNAscan-SE/BACPHLIP/ABRicate/CheckV/Pharokka/geNomad/Phold/clinker artifact status, table shapes, sizes, and checksums.
+- `99_report/tables/optional_tool_summary.tsv`: optional tRNAscan-SE/BACPHLIP/ABRicate/CheckV/Pharokka/geNomad/Phold/clinker/iPHoP artifact status, table shapes, sizes, and checksums.
 - `99_report/important_files.tsv`: important output manifest.
 - `99_report/validation_manifest.json`: report-level QA manifest.
 - `99_report/software_versions.tsv`: software/runtime version capture.

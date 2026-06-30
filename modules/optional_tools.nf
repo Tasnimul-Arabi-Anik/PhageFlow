@@ -209,6 +209,40 @@ EOF
     """
 }
 
+process IPHOP {
+    tag "${sample_id}"
+    publishDir "${params.outdir}/05_optional/iphop", mode: 'copy'
+
+    input:
+    tuple val(sample_id), path(fasta), val(role), val(host_id), val(accession)
+
+    output:
+    tuple val(sample_id), path("${sample_id}.iphop"), emit: iphop_dir
+    tuple val(sample_id), path("${sample_id}.iphop.log"), emit: log
+
+    script:
+    """
+    set -euo pipefail
+    if [ -z "${params.iphop_db}" ]; then
+        echo "ERROR: --iphop_db is required when --run_iphop true" >&2
+        exit 1
+    fi
+    IPHOP_BIN="${params.iphop_bin}"
+    if ! command -v "\${IPHOP_BIN}" >/dev/null 2>&1; then
+        echo "ERROR: iPHoP not found. Install it with conda/mamba or pass --iphop_bin /path/to/iphop." >&2
+        exit 127
+    fi
+    "\${IPHOP_BIN}" predict \
+        --fa_file "${fasta}" \
+        --db_dir "${params.iphop_db}" \
+        --out_dir "${sample_id}.iphop" \
+        --num_threads ${task.cpus} \
+        --min_score ${params.iphop_min_score} \
+        ${params.iphop_extra_args} \
+        > "${sample_id}.iphop.log" 2>&1
+    """
+}
+
 process OPTIONAL_TOOL_SUMMARY {
     tag "optional_tool_summary"
     publishDir "${params.outdir}/05_optional/summary", mode: 'copy'
@@ -224,6 +258,8 @@ process OPTIONAL_TOOL_SUMMARY {
     path genomad_logs
     path phold_artifacts
     path phold_logs
+    path iphop_artifacts
+    path iphop_logs
     path clinker_artifacts
 
     output:
@@ -240,6 +276,8 @@ process OPTIONAL_TOOL_SUMMARY {
     def genomadLogArgs = genomad_logs.collect { "--genomad-log ${it}" }.join(' ')
     def pholdArgs = phold_artifacts.collect { "--phold-artifact ${it}" }.join(' ')
     def pholdLogArgs = phold_logs.collect { "--phold-log ${it}" }.join(' ')
+    def iphopArgs = iphop_artifacts.collect { "--iphop-artifact ${it}" }.join(' ')
+    def iphopLogArgs = iphop_logs.collect { "--iphop-log ${it}" }.join(' ')
     def clinkerArgs = clinker_artifacts.collect { "--clinker-artifact ${it}" }.join(' ')
     """
     python3 ${projectDir}/bin/optional_tool_summary.py \
@@ -253,6 +291,8 @@ process OPTIONAL_TOOL_SUMMARY {
         ${genomadLogArgs} \
         ${pholdArgs} \
         ${pholdLogArgs} \
+        ${iphopArgs} \
+        ${iphopLogArgs} \
         ${clinkerArgs} \
         --output optional_tool_summary.tsv \
         --summary-json optional_tool_summary.json
