@@ -13,7 +13,7 @@ PhageFlow is functionally complete and validated for the current lightweight sin
 
 This is a software/workflow validation statement only. Biological interpretation, manuscript-grade conclusions, and project-specific claims remain outside the pipeline validation scope. See [`docs/validation_status.md`](docs/validation_status.md) for the validation evidence and boundaries, and [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for the release-state summary.
 
-The v0.2 extension review, roadmap status, and completion audit are preserved in [`docs/v0.2_extension_review.md`](docs/v0.2_extension_review.md), [`docs/v0.2_roadmap_status.md`](docs/v0.2_roadmap_status.md), and [`docs/v0.2_completion_audit.md`](docs/v0.2_completion_audit.md). The v0.3 analysis roadmap is in [`docs/v0.3_analysis_roadmap.md`](docs/v0.3_analysis_roadmap.md); the active v0.4 lightweight/heavy expansion audit and progress notes are in [`docs/v0.4_analysis_expansion_audit.md`](docs/v0.4_analysis_expansion_audit.md) and [`docs/v0.4_progress.md`](docs/v0.4_progress.md).
+The v0.2 extension review, roadmap status, and completion audit are preserved in [`docs/v0.2_extension_review.md`](docs/v0.2_extension_review.md), [`docs/v0.2_roadmap_status.md`](docs/v0.2_roadmap_status.md), and [`docs/v0.2_completion_audit.md`](docs/v0.2_completion_audit.md). The v0.3 analysis roadmap is in [`docs/v0.3_analysis_roadmap.md`](docs/v0.3_analysis_roadmap.md); the active v0.4 lightweight/heavy expansion audit, capability matrix, and progress notes are in [`docs/v0.4_analysis_expansion_audit.md`](docs/v0.4_analysis_expansion_audit.md), [`docs/analysis_capability_matrix.md`](docs/analysis_capability_matrix.md), and [`docs/v0.4_progress.md`](docs/v0.4_progress.md).
 
 ## What It Does
 

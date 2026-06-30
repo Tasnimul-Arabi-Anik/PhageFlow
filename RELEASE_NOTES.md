@@ -10,6 +10,7 @@ v0.4 analysis-expansion first pass:
 - Added `optional_tool_metrics.tsv` and `phageflow optional-metrics` for compact high-level optional-tool metric counts without printing annotation, taxonomy, host-prediction, or feature values.
 - Added report-import support for completed-run pangenome sensitivity comparisons, including compact summary tables and package/summarize visibility.
 - Added import-only PhaBOX/PhaBOX2 artifact and metric summaries without adding a default wrapper or database dependency.
+- Added an analysis capability matrix that separates lightweight defaults, heavy optional wrappers, import-only summaries, and deferred candidates.
 
 ## v0.3.0-validated - 2026-07-01
 
