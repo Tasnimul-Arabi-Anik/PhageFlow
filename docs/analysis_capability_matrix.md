@@ -4,6 +4,8 @@ Date: 2026-07-01
 
 This matrix separates validated lightweight defaults from heavy optional modules, import-only summaries, and deferred ideas. The intent is to keep PhageFlow comprehensive without making the default workflow slow, database-heavy, or biologically overclaimed.
 
+Before promoting any deferred or import-only capability, apply the analysis scope gate in `docs/release_checklist.md`.
+
 ## Lightweight Default
 
 | Area | Current capability | Main artifacts | Boundary |
@@ -58,6 +60,6 @@ This matrix separates validated lightweight defaults from heavy optional modules
 
 ## Next High-Value Additions
 
-1. A small release checklist for deciding whether an output is default, heavy optional, import-only, or deferred.
-2. Wrapper execution for PhaBOX/PhaBOX2 only after a stable local CLI/database validation pass.
-3. Optional public-database taxonomy assignment only after database/version policy is defined.
+1. Wrapper execution for PhaBOX/PhaBOX2 only after a stable local CLI/database validation pass.
+2. Optional public-database taxonomy assignment only after database/version policy is defined.
+3. Read/metagenomic modes only after separate input contracts and validation datasets exist.
