@@ -1,0 +1,8 @@
+.phageflow-env/
+validation/
+**/__pycache__/
+**/*.pyc
+*.tar.gz
+*.zip
+*.tmp
+*.log

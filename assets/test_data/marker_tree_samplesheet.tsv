@@ -1,0 +1,4 @@
+sample_id	fasta	role	host_id	accession
+toy_phage_a	toy_phage_a.fasta	query		
+toy_phage_b	toy_phage_b.fasta	reference		
+toy_phage_c	toy_phage_c.fasta	reference		

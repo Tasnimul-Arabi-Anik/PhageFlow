@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+from artifact_inventory import collect_artifact_summary
+from safety_summary import collect_safety_rows, summarize_safety_rows
+from structural_summary import collect_structural_rows, summarize_structural_rows
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Create a sanitized QA summary for a completed PhageFlow run.")
+    parser.add_argument("--outdir", required=True, type=Path, help="Completed PhageFlow output directory.")
+    parser.add_argument("--output", default=None, type=Path, help="Optional JSON output path. Defaults to stdout.")
+    parser.add_argument("--compact", action="store_true", help="Write compact JSON instead of indented JSON.")
+    args = parser.parse_args()
+
+    if not args.outdir.exists() or not args.outdir.is_dir():
+        parser.error(f"--outdir is not a directory: {args.outdir}")
+
+    summary = collect_artifact_summary(args.outdir)
+    summary["safety_screen_summary"] = summarize_safety_rows(collect_safety_rows(args.outdir))
+    summary["structural_annotation_summary"] = summarize_structural_rows(collect_structural_rows(args.outdir))
+    text = json.dumps(summary, sort_keys=True, separators=(",", ":")) if args.compact else json.dumps(summary, indent=2)
+    text += "\n"
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(text)
+    else:
+        print(text, end="")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

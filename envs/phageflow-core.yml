@@ -1,0 +1,13 @@
+name: phageflow-core
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - nextflow
+  - mmseqs2
+  - blast
+  - pandas
+  - matplotlib-base
+  - seaborn

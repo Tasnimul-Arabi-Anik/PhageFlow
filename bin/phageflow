@@ -1,0 +1,439 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PHAGEFLOW_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DEFAULT_ENV_PREFIX="${PHAGEFLOW_DIR}/.phageflow-env"
+ENV_PREFIX="${PHAGEFLOW_ENV_PREFIX:-${DEFAULT_ENV_PREFIX}}"
+ENV_FILE="${PHAGEFLOW_DIR}/envs/phageflow-core.yml"
+WITH_GROUPS=""
+EXTRA_PACKAGES=""
+REMAINING_ARGS=()
+
+usage() {
+  cat <<'EOF'
+PhageFlow launcher
+
+Usage:
+  phageflow/bin/phageflow install [--env-prefix PATH] [--with GROUPS] [--packages "pkg1 pkg2"]
+  phageflow/bin/phageflow test [--env-prefix PATH]
+  phageflow/bin/phageflow validate --outdir PATH [--env-prefix PATH] [extra validator args]
+  phageflow/bin/phageflow summarize --outdir PATH [--output summary.json]
+  phageflow/bin/phageflow safety-summary --outdir PATH [--output safety_summary.tsv]
+  phageflow/bin/phageflow structural-summary --outdir PATH [--output structural_summary.tsv]
+  phageflow/bin/phageflow pangenome-sensitivity --left RUN_A --right RUN_B [--output comparison.tsv]
+  phageflow/bin/phageflow package --outdir PATH [--output package.tar.gz] [--include-logs]
+  phageflow/bin/phageflow container-smoke
+  phageflow/bin/phageflow run [--env-prefix PATH] [nextflow args]
+  phageflow/bin/phageflow doctor [--env-prefix PATH] [--with GROUPS]
+
+Optional install groups:
+  lite         tRNAscan-SE, BACPHLIP, ABRicate
+  publication lite + CheckV, Pharokka, geNomad, clinker
+  structure   Phold
+  phylogeny   MAFFT, IQ-TREE2, trimAl, Biopython
+  host        Prodigal and minced for host-context enrichment
+  all         publication + structure + phylogeny + host
+
+Examples:
+  bash phageflow/bin/phageflow test
+  bash phageflow/bin/phageflow run --input my_phage.fasta --outdir results/my_phage
+  bash phageflow/bin/phageflow summarize --outdir results/my_phage --output results/my_phage_summary.json
+  bash phageflow/bin/phageflow safety-summary --outdir results/my_phage --output results/my_phage_safety_summary.tsv
+  bash phageflow/bin/phageflow structural-summary --outdir results/my_phage --output results/my_phage_structural_summary.tsv
+  bash phageflow/bin/phageflow pangenome-sensitivity --left results/mmseqs_run --right results/rbh_run --output pangenome_sensitivity.tsv
+  bash phageflow/bin/phageflow package --outdir results/my_phage --output my_phage_phageflow_package.tar.gz
+  bash phageflow/bin/phageflow container-smoke
+  bash phageflow/bin/phageflow install --with publication
+  bash phageflow/bin/phageflow install --with all --packages "custom-bioconda-tool"
+  bash phageflow/bin/phageflow doctor --with publication
+  bash phageflow/bin/phageflow install --with phylogeny
+  PHAGEFLOW_ENV_PREFIX=/tmp/phageflow-env bash phageflow/bin/phageflow install --with lite
+
+Behavior:
+  If required tools are missing, the launcher creates a removable conda environment at
+  phageflow/.phageflow-env by default, or at PHAGEFLOW_ENV_PREFIX / --env-prefix.
+  Optional groups install executables only; large databases such as CheckV, Pharokka,
+  geNomad, and Phold databases still need to be downloaded/provided separately.
+EOF
+}
+
+parse_args() {
+  REMAINING_ARGS=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --env-prefix)
+        ENV_PREFIX="$2"
+        shift 2
+        ;;
+      --env-prefix=*)
+        ENV_PREFIX="${1#--env-prefix=}"
+        shift
+        ;;
+      --with)
+        if [[ "${cmd}" == "install" || "${cmd}" == "doctor" ]]; then
+          WITH_GROUPS="$2"
+          shift 2
+        else
+          REMAINING_ARGS+=("$1")
+          shift
+        fi
+        ;;
+      --with=*)
+        if [[ "${cmd}" == "install" || "${cmd}" == "doctor" ]]; then
+          WITH_GROUPS="${1#--with=}"
+          shift
+        else
+          REMAINING_ARGS+=("$1")
+          shift
+        fi
+        ;;
+      --packages)
+        if [[ "${cmd}" == "install" ]]; then
+          EXTRA_PACKAGES="$2"
+          shift 2
+        else
+          REMAINING_ARGS+=("$1")
+          shift
+        fi
+        ;;
+      --packages=*)
+        if [[ "${cmd}" == "install" ]]; then
+          EXTRA_PACKAGES="${1#--packages=}"
+          shift
+        else
+          REMAINING_ARGS+=("$1")
+          shift
+        fi
+        ;;
+      *)
+        REMAINING_ARGS+=("$1")
+        shift
+        ;;
+    esac
+  done
+}
+
+find_conda_frontend() {
+  if command -v mamba >/dev/null 2>&1; then
+    echo "mamba"
+  elif command -v micromamba >/dev/null 2>&1; then
+    echo "micromamba"
+  elif command -v conda >/dev/null 2>&1; then
+    echo "conda"
+  elif [[ -x "$HOME/miniconda3/bin/conda" ]]; then
+    echo "$HOME/miniconda3/bin/conda"
+  elif [[ -x "$HOME/miniforge3/bin/conda" ]]; then
+    echo "$HOME/miniforge3/bin/conda"
+  else
+    return 1
+  fi
+}
+
+python_modules_ok() {
+  python3 - <<'PYMOD' >/dev/null 2>&1
+for module in ["matplotlib", "pandas", "seaborn"]:
+    __import__(module)
+PYMOD
+}
+
+tools_ok() {
+  command -v nextflow >/dev/null 2>&1 && \
+  command -v mmseqs >/dev/null 2>&1 && \
+  command -v blastp >/dev/null 2>&1 && \
+  command -v blastn >/dev/null 2>&1 && \
+  command -v makeblastdb >/dev/null 2>&1 && \
+  python_modules_ok
+}
+
+env_tools_ok() {
+  [[ -x "${ENV_PREFIX}/bin/nextflow" ]] && \
+  [[ -x "${ENV_PREFIX}/bin/mmseqs" ]] && \
+  [[ -x "${ENV_PREFIX}/bin/blastp" ]] && \
+  [[ -x "${ENV_PREFIX}/bin/blastn" ]] && \
+  [[ -x "${ENV_PREFIX}/bin/makeblastdb" ]] && \
+  "${ENV_PREFIX}/bin/python3" - <<'PYMOD' >/dev/null 2>&1
+for module in ["matplotlib", "pandas", "seaborn"]:
+    __import__(module)
+PYMOD
+}
+
+conda_install_packages() {
+  local frontend="$1"
+  shift
+  if [[ "$#" -eq 0 ]]; then
+    return 0
+  fi
+  if [[ "$(basename "${frontend}")" == "micromamba" ]]; then
+    "${frontend}" install -y -p "${ENV_PREFIX}" -c conda-forge -c bioconda "$@"
+  else
+    "${frontend}" install -y -p "${ENV_PREFIX}" -c conda-forge -c bioconda "$@"
+  fi
+}
+
+install_env() {
+  if env_tools_ok; then
+    echo "PhageFlow environment already present: ${ENV_PREFIX}"
+    return 0
+  fi
+  local frontend
+  if ! frontend="$(find_conda_frontend)"; then
+    echo "ERROR: conda/mamba/micromamba not found. Install Miniconda/Mambaforge or set PATH, then rerun." >&2
+    return 1
+  fi
+  echo "Creating removable PhageFlow environment at: ${ENV_PREFIX}"
+  echo "Using: ${frontend}"
+  mkdir -p "$(dirname "${ENV_PREFIX}")"
+  if [[ "$(basename "${frontend}")" == "micromamba" ]]; then
+    "${frontend}" create -y -p "${ENV_PREFIX}" -f "${ENV_FILE}"
+  else
+    "${frontend}" env create -p "${ENV_PREFIX}" -f "${ENV_FILE}" || \
+    "${frontend}" install -y -p "${ENV_PREFIX}" -c conda-forge -c bioconda python=3.11 nextflow mmseqs2 blast pandas matplotlib-base seaborn
+  fi
+}
+
+append_group_packages() {
+  local group="$1"
+  case "${group}" in
+    lite)
+      OPTIONAL_PACKAGES+=(trnascan-se bacphlip abricate)
+      ;;
+    publication)
+      OPTIONAL_PACKAGES+=(trnascan-se bacphlip abricate checkv pharokka genomad clinker)
+      ;;
+    structure)
+      OPTIONAL_PACKAGES+=(phold)
+      ;;
+    phylogeny)
+      OPTIONAL_PACKAGES+=(mafft iqtree trimal biopython)
+      ;;
+    host)
+      OPTIONAL_PACKAGES+=(prodigal minced)
+      ;;
+    all)
+      OPTIONAL_PACKAGES+=(trnascan-se bacphlip abricate checkv pharokka genomad clinker phold mafft iqtree trimal biopython prodigal minced)
+      ;;
+    "")
+      ;;
+    *)
+      echo "ERROR: unknown optional install group '${group}'. Use lite, publication, structure, phylogeny, host, or all." >&2
+      return 2
+      ;;
+  esac
+}
+
+resolve_optional_packages() {
+  OPTIONAL_PACKAGES=()
+  if [[ -n "${WITH_GROUPS}" ]]; then
+    local old_ifs="${IFS}"
+    IFS=',' read -r -a groups <<< "${WITH_GROUPS}"
+    IFS="${old_ifs}"
+    for group in "${groups[@]}"; do
+      group="${group//[[:space:]]/}"
+      append_group_packages "${group}"
+    done
+  fi
+  if [[ -n "${EXTRA_PACKAGES}" ]]; then
+    # Intentional word splitting: package names are whitespace-separated.
+    for pkg in ${EXTRA_PACKAGES}; do
+      OPTIONAL_PACKAGES+=("${pkg}")
+    done
+  fi
+  if [[ "${#OPTIONAL_PACKAGES[@]}" -eq 0 ]]; then
+    return 0
+  fi
+  mapfile -t OPTIONAL_PACKAGES < <(printf '%s\n' "${OPTIONAL_PACKAGES[@]}" | awk 'NF && !seen[$0]++')
+}
+
+install_optionals() {
+  resolve_optional_packages
+  if [[ "${#OPTIONAL_PACKAGES[@]}" -eq 0 ]]; then
+    return 0
+  fi
+  local frontend
+  if ! frontend="$(find_conda_frontend)"; then
+    echo "ERROR: conda/mamba/micromamba not found. Install Miniconda/Mambaforge or set PATH, then rerun." >&2
+    return 1
+  fi
+  install_env
+  echo "Installing PhageFlow optional packages into: ${ENV_PREFIX}"
+  printf 'Optional packages: %s\n' "${OPTIONAL_PACKAGES[*]}"
+  conda_install_packages "${frontend}" "${OPTIONAL_PACKAGES[@]}"
+}
+
+ensure_env_or_system() {
+  if env_tools_ok; then
+    export PATH="${ENV_PREFIX}/bin:${PATH}"
+    echo "Using PhageFlow environment: ${ENV_PREFIX}"
+    return 0
+  fi
+  if tools_ok; then
+    echo "Using tools from current PATH."
+    return 0
+  fi
+  install_env
+  export PATH="${ENV_PREFIX}/bin:${PATH}"
+}
+
+version_first_line() {
+  local tool="$1"
+  shift
+  if ! command -v "${tool}" >/dev/null 2>&1; then
+    echo "not_found"
+    return 0
+  fi
+  local output
+  output="$({ "${tool}" "$@"; } 2>&1 | head -n 1 || true)"
+  if [[ -n "${output}" ]]; then
+    echo "${output}"
+  else
+    echo "available"
+  fi
+}
+
+optional_tools_for_groups() {
+  OPTIONAL_TOOLS=()
+  if [[ -z "${WITH_GROUPS}" ]]; then
+    return 0
+  fi
+  local old_ifs="${IFS}"
+  IFS=',' read -r -a groups <<< "${WITH_GROUPS}"
+  IFS="${old_ifs}"
+  for group in "${groups[@]}"; do
+    group="${group//[[:space:]]/}"
+    case "${group}" in
+      lite)
+        OPTIONAL_TOOLS+=(tRNAscan-SE bacphlip abricate)
+        ;;
+      publication)
+        OPTIONAL_TOOLS+=(tRNAscan-SE bacphlip abricate checkv pharokka.py genomad clinker)
+        ;;
+      structure)
+        OPTIONAL_TOOLS+=(phold)
+        ;;
+      phylogeny)
+        OPTIONAL_TOOLS+=(mafft iqtree2 iqtree trimal)
+        ;;
+      host)
+        OPTIONAL_TOOLS+=(prodigal minced)
+        ;;
+      all)
+        OPTIONAL_TOOLS+=(tRNAscan-SE bacphlip abricate checkv pharokka.py genomad clinker phold mafft iqtree2 iqtree trimal prodigal minced)
+        ;;
+      "")
+        ;;
+      *)
+        echo "ERROR: unknown optional group '${group}'. Use lite, publication, structure, phylogeny, host, or all." >&2
+        return 2
+        ;;
+    esac
+  done
+  if [[ "${#OPTIONAL_TOOLS[@]}" -gt 0 ]]; then
+    mapfile -t OPTIONAL_TOOLS < <(printf '%s\n' "${OPTIONAL_TOOLS[@]}" | awk 'NF && !seen[$0]++')
+  fi
+}
+
+print_optional_versions() {
+  optional_tools_for_groups
+  if [[ "${#OPTIONAL_TOOLS[@]}" -eq 0 ]]; then
+    return 0
+  fi
+  echo "Optional tool status for --with ${WITH_GROUPS}:"
+  for tool in "${OPTIONAL_TOOLS[@]}"; do
+    case "${tool}" in
+      tRNAscan-SE) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      bacphlip) echo "${tool}: $(version_first_line "${tool}" --help)" ;;
+      checkv) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      abricate) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      pharokka.py) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      genomad) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      phold) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      clinker) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      mafft) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      iqtree2) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      iqtree) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      trimal) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+      prodigal) echo "${tool}: $(version_first_line "${tool}" -v)" ;;
+      minced) echo "${tool}: $(version_first_line "${tool}" -h)" ;;
+      *) echo "${tool}: $(version_first_line "${tool}" --version)" ;;
+    esac
+  done
+}
+
+print_versions() {
+  ensure_env_or_system
+  echo "PhageFlow directory: ${PHAGEFLOW_DIR}"
+  echo "Environment prefix: ${ENV_PREFIX}"
+  echo "nextflow: $(nextflow -version 2>&1 | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g')"
+  echo "python: $(python3 --version 2>&1)"
+  echo "mmseqs: $(mmseqs version 2>&1 | head -n 1)"
+  echo "blastp: $(blastp -version 2>&1 | head -n 1)"
+  echo "blastn: $(blastn -version 2>&1 | head -n 1)"
+  python3 - <<'PYMOD'
+for module in ["matplotlib", "pandas", "seaborn"]:
+    mod = __import__(module)
+    print(f"{module}: {getattr(mod, '__version__', 'ok')}")
+PYMOD
+  print_optional_versions
+}
+
+cmd="${1:-}"
+if [[ -z "${cmd}" || "${cmd}" == "-h" || "${cmd}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+shift || true
+parse_args "$@"
+set -- "${REMAINING_ARGS[@]}"
+
+case "${cmd}" in
+  install)
+    install_env
+    install_optionals
+    if [[ -n "${WITH_GROUPS}" ]]; then
+      export PATH="${ENV_PREFIX}/bin:${PATH}"
+      print_optional_versions
+    fi
+    ;;
+  doctor)
+    print_versions
+    ;;
+  test)
+    ensure_env_or_system
+    cd "$(dirname "${PHAGEFLOW_DIR}")"
+    nextflow run "${PHAGEFLOW_DIR}/main.nf" -profile test "$@"
+    python3 "${PHAGEFLOW_DIR}/bin/validate_phageflow_run.py" --outdir phageflow_test_results --require-pangenome-rows
+    ;;
+  validate)
+    ensure_env_or_system
+    python3 "${PHAGEFLOW_DIR}/bin/validate_phageflow_run.py" "$@"
+    ;;
+  summarize)
+    python3 "${PHAGEFLOW_DIR}/bin/summarize_run.py" "$@"
+    ;;
+  safety-summary)
+    python3 "${PHAGEFLOW_DIR}/bin/safety_summary.py" "$@"
+    ;;
+  structural-summary)
+    python3 "${PHAGEFLOW_DIR}/bin/structural_summary.py" "$@"
+    ;;
+  pangenome-sensitivity)
+    python3 "${PHAGEFLOW_DIR}/bin/pangenome_sensitivity.py" "$@"
+    ;;
+  package)
+    python3 "${PHAGEFLOW_DIR}/bin/package_run.py" "$@"
+    ;;
+  container-smoke)
+    bash "${PHAGEFLOW_DIR}/bin/container_smoke_test.sh" "$@"
+    ;;
+  run)
+    ensure_env_or_system
+    cd "$(dirname "${PHAGEFLOW_DIR}")"
+    nextflow run "${PHAGEFLOW_DIR}/main.nf" "$@"
+    ;;
+  *)
+    echo "ERROR: unknown command: ${cmd}" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
