@@ -8,6 +8,7 @@ import tarfile
 from pathlib import Path
 
 from artifact_inventory import collect_artifact_summary, checksum_rows, default_package_files, rows_to_tsv
+from functional_category_summary import collect_functional_category_rows, rows_to_tsv as functional_rows_to_tsv, summarize_rows as summarize_functional_rows
 from optional_tool_metrics import collect_optional_metric_rows, rows_to_tsv as optional_metric_rows_to_tsv
 from optional_tool_summary import collect_optional_rows, rows_to_tsv as optional_rows_to_tsv
 from pangenome_sensitivity import report_import_summary, summary_rows_to_tsv, summarize_rows, read_comparison_rows
@@ -78,6 +79,7 @@ def main() -> int:
         phabox_artifacts=[],
         clinker_artifacts=[],
     )
+    functional_rows = collect_functional_category_rows(samplesheet=None, root=root, pharokka_artifacts=[])
     sensitivity_rows = read_comparison_rows(root / "99_report" / "tables" / "pangenome_sensitivity.tsv")
     summary["safety_screen_summary"] = {
         "rows": len(safety_rows),
@@ -97,6 +99,7 @@ def main() -> int:
         "statuses": sorted({row["status"] for row in optional_metric_rows}),
         "available_metric_rows": sum(1 for row in optional_metric_rows if row["status"] == "available"),
     }
+    summary["functional_category_summary"] = summarize_functional_rows(functional_rows)
     summary["pangenome_sensitivity_summary"] = report_import_summary(root)
     prefix = "phageflow_package"
 
@@ -110,6 +113,7 @@ def main() -> int:
         add_text(tar, f"{prefix}/phageflow_structural_summary.tsv", structural_rows_to_tsv(structural_rows))
         add_text(tar, f"{prefix}/phageflow_optional_tool_summary.tsv", optional_rows_to_tsv(optional_rows))
         add_text(tar, f"{prefix}/phageflow_optional_tool_metrics.tsv", optional_metric_rows_to_tsv(optional_metric_rows))
+        add_text(tar, f"{prefix}/phageflow_functional_category_summary.tsv", functional_rows_to_tsv(functional_rows))
         add_text(tar, f"{prefix}/phageflow_pangenome_sensitivity_summary.tsv", summary_rows_to_tsv(summarize_rows(sensitivity_rows)))
 
     print(f"PhageFlow package written: {output}")

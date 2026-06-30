@@ -182,6 +182,25 @@ bash bin/phageflow optional-metrics \
 
 This table reports compact counts from stable high-level optional-tool outputs, such as quality-summary rows, confidence fields detected, or host-prediction score fields detected. It intentionally does not print annotation values, taxonomy labels, predicted hosts, feature names, or biological conclusions.
 
+## Functional Category Counts
+
+Every new PhageFlow report includes:
+
+```text
+99_report/tables/functional_category_summary.tsv
+```
+
+Use the completed-run command when you want the same summary from existing heavy annotation outputs:
+
+```bash
+bash bin/phageflow functional-summary \
+  --root results/my_run \
+  --output results/my_run_functional_category_summary.tsv \
+  --summary-json results/my_run_functional_category_summary.json
+```
+
+The first implementation counts broad category values from Pharokka-style category columns, such as PHROG category fields, when present. It does not print individual gene/product annotations and reports `not_run` or `category_column_missing` when a consistent category column is absent.
+
 ## Completed-Run Pangenome Sensitivity Summary
 
 Run the MMseqs and RBH modes into separate output directories, then compare their software summary metrics:

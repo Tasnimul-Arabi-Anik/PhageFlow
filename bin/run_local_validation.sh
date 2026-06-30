@@ -17,6 +17,7 @@ python3 bin/summarize_run.py --outdir phageflow_validation_mmseqs --output /tmp/
 python3 bin/safety_summary.py --outdir phageflow_validation_mmseqs --output /tmp/phageflow_validation_mmseqs_safety.tsv --summary-json /tmp/phageflow_validation_mmseqs_safety.json
 python3 bin/optional_tool_summary.py --root phageflow_validation_mmseqs --output /tmp/phageflow_validation_mmseqs_optional.tsv --summary-json /tmp/phageflow_validation_mmseqs_optional.json
 python3 bin/optional_tool_metrics.py --root phageflow_validation_mmseqs --output /tmp/phageflow_validation_mmseqs_optional_metrics.tsv --summary-json /tmp/phageflow_validation_mmseqs_optional_metrics.json
+python3 bin/functional_category_summary.py --root phageflow_validation_mmseqs --output /tmp/phageflow_validation_mmseqs_functional_categories.tsv --summary-json /tmp/phageflow_validation_mmseqs_functional_categories.json
 python3 bin/structural_summary.py --outdir phageflow_validation_mmseqs --output /tmp/phageflow_validation_mmseqs_structural.tsv --summary-json /tmp/phageflow_validation_mmseqs_structural.json
 python3 bin/pangenome_sensitivity.py --left phageflow_validation_mmseqs --right phageflow_validation_rbh --output /tmp/phageflow_pangenome_sensitivity.tsv --summary-output /tmp/phageflow_pangenome_sensitivity_summary.tsv --import-to-report phageflow_validation_mmseqs
 python3 bin/package_run.py --outdir phageflow_validation_mmseqs --output /tmp/phageflow_validation_mmseqs_package.tar.gz --force

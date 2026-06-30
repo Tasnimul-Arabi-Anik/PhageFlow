@@ -492,6 +492,7 @@ def claim_evidence_rows(
     crispr_summary: dict[str, str],
     optional_summary_rows: list[dict[str, str]],
     optional_metric_rows: list[dict[str, str]],
+    functional_category_rows: list[dict[str, str]],
 ) -> list[dict[str, str]]:
     def row(claim_id: str, claim_type: str, status: str, artifact: str, limitation: str) -> dict[str, str]:
         return {
@@ -510,6 +511,7 @@ def claim_evidence_rows(
     termini_available = bool(fasta_rows) and all("termini_heuristic" in item for item in fasta_rows)
     optional_available = sum(1 for item in optional_summary_rows if item.get("status") == "available")
     optional_metrics_available = sum(1 for item in optional_metric_rows if item.get("status") == "available")
+    functional_categories_available = sum(1 for item in functional_category_rows if item.get("status") == "available")
     reference_status = reference_summary.get("status", "not_available")
     return [
         row("input_validation", "software_validation", "PASS" if validation.get("genomes") else "WARN", "tables/validation_summary.tsv", "Validates input contract only."),
@@ -530,11 +532,12 @@ def claim_evidence_rows(
         row("crispr_spacer_match", "software_artifact", "PASS" if crispr_status in {"completed", "disabled"} else "WARN", "tables/crispr_spacer_summary.tsv", f"Spacer matches reported: {len(crispr_match_rows)}."),
         row("optional_tool_summary", "software_artifact", "PASS" if optional_summary_rows else "WARN", "tables/optional_tool_summary.tsv", f"Optional artifacts available: {optional_available}. Summaries do not interpret optional-tool biology."),
         row("optional_tool_metrics", "software_artifact", "PASS" if optional_metric_rows else "WARN", "tables/optional_tool_metrics.tsv", f"Optional metric rows available: {optional_metrics_available}. Metrics are counts only and do not print optional-tool values."),
+        row("functional_category_summary", "software_artifact", "PASS" if functional_category_rows else "WARN", "tables/functional_category_summary.tsv", f"Functional category rows available: {functional_categories_available}. Counts require consistent heavy annotation outputs."),
         row("report_manifest", "software_validation", "PASS", "validation_manifest.json", "Report-level completeness manifest only."),
     ]
 
 
-def build_html(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_rows, host_adaptation_rows, crispr_match_rows, crispr_summary, intergenomic_pair_rows, reference_pair_rows, reference_nearest_rows, marker_presence_rows, marker_topology_rows, marker_provenance_rows, optional_summary_rows, optional_metric_rows, claim_rows, figure_paths, important_files) -> str:
+def build_html(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_rows, host_adaptation_rows, crispr_match_rows, crispr_summary, intergenomic_pair_rows, reference_pair_rows, reference_nearest_rows, marker_presence_rows, marker_topology_rows, marker_provenance_rows, optional_summary_rows, optional_metric_rows, functional_category_rows, claim_rows, figure_paths, important_files) -> str:
     genomes = validation.get("genomes", str(len(fasta_rows)))
     orthogroups = pangenome_summary.get("orthogroups", "0")
     exact_dups = cohort_summary.get("exact_duplicate_pairs", "0")
@@ -548,6 +551,7 @@ def build_html(args, validation, cohort_summary, intergenomic_summary, reference
     crispr_hits = crispr_summary.get("spacer_matches", str(len(crispr_match_rows)))
     optional_available = sum(1 for row in optional_summary_rows if row.get("status") == "available")
     optional_metrics_available = sum(1 for row in optional_metric_rows if row.get("status") == "available")
+    functional_categories_available = sum(1 for row in functional_category_rows if row.get("status") == "available")
     warnings = []
     if int(float(exact_dups or 0)) > 0:
         warnings.append(f"{exact_dups} exact duplicate genome pair(s) detected.")
@@ -627,6 +631,7 @@ footer {{ color:var(--muted); padding:20px 6vw 40px; font-size:.9rem; }}
     <div class="card"><div class="metric">{html.escape(str(crispr_hits))}</div><div class="label">CRISPR spacer matches</div></div>
     <div class="card"><div class="metric">{html.escape(str(optional_available))}</div><div class="label">optional artifacts available</div></div>
     <div class="card"><div class="metric">{html.escape(str(optional_metrics_available))}</div><div class="label">optional metric rows available</div></div>
+    <div class="card"><div class="metric">{html.escape(str(functional_categories_available))}</div><div class="label">functional category rows</div></div>
     <div class="card"><div class="metric">{html.escape(args.pangenome_method)}</div><div class="label">pangenome method</div></div>
   </div>
   <section><h2>Report QA Warnings</h2>{''.join(f'<div class="warning">{html.escape(w)}</div>' for w in warnings)}</section>
@@ -640,6 +645,7 @@ footer {{ color:var(--muted); padding:20px 6vw 40px; font-size:.9rem; }}
   <section><h2>Host Context</h2>{html_table(host_rows)}{html_table(host_adaptation_rows)}{html_table(crispr_match_rows)}</section>
   <section><h2>Optional Tool Artifacts</h2>{html_table(optional_summary_rows, max_rows=30)}</section>
   <section><h2>Optional Tool Metrics</h2>{html_table(optional_metric_rows, max_rows=40)}</section>
+  <section><h2>Functional Category Counts</h2>{html_table(functional_category_rows, max_rows=40)}</section>
   <section><h2>Claim-Evidence Matrix</h2>{html_table(claim_rows, max_rows=20)}</section>
   <section><h2>Downloads</h2><ul>{download_links}</ul></section>
   <section><h2>Methods Summary</h2><p>Inputs were normalized and validated, genome-level FASTA statistics were calculated, lightweight ORFs were predicted for dependency-light testing, codon usage was summarized, cohort redundancy was screened by SHA256 and canonical k-mer Jaccard similarity, BLASTN intergenomic similarity was estimated from reciprocal local alignments, optional marker-gene phylogenies were inferred from selected conserved phage proteins, host context included nucleotide composition plus codon/RSCU adaptation when a host genome was supplied, optional CRISPR spacer matching was performed against phage genomes when enabled, and pangenome inference used the selected native Nextflow backend. Publication analyses should use a consistent phage annotation backend such as Pharokka/PHANOTATE across all genomes before final biological interpretation.</p></section>
@@ -650,7 +656,7 @@ footer {{ color:var(--muted); padding:20px 6vw 40px; font-size:.9rem; }}
 '''
 
 
-def build_markdown(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_adaptation_rows, crispr_match_rows, intergenomic_pair_rows, reference_nearest_rows, marker_topology_rows, optional_summary_rows, optional_metric_rows) -> str:
+def build_markdown(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_adaptation_rows, crispr_match_rows, intergenomic_pair_rows, reference_nearest_rows, marker_topology_rows, optional_summary_rows, optional_metric_rows, functional_category_rows) -> str:
     lines = ["# PhageFlow Report", ""]
     lines.append(f"- Genomes analyzed: {validation.get('genomes', len(fasta_rows))}")
     lines.append(f"- Pangenome method: `{args.pangenome_method}`")
@@ -668,6 +674,7 @@ def build_markdown(args, validation, cohort_summary, intergenomic_summary, refer
     lines.append(f"- CRISPR spacer matches: {len(crispr_match_rows)}")
     lines.append(f"- Optional artifacts available: {sum(1 for row in optional_summary_rows if row.get('status') == 'available')}")
     lines.append(f"- Optional metric rows available: {sum(1 for row in optional_metric_rows if row.get('status') == 'available')}")
+    lines.append(f"- Functional category rows available: {sum(1 for row in functional_category_rows if row.get('status') == 'available')}")
     lines.append("")
     lines.append("## Main Figures")
     lines.append("")
@@ -757,6 +764,17 @@ def build_markdown(args, validation, cohort_summary, intergenomic_summary, refer
     else:
         lines.append("No optional-tool metric rows were generated.")
     lines.append("")
+    lines.append("## Functional Category Counts")
+    lines.append("")
+    if functional_category_rows:
+        cols = ["tool", "sample_id", "category_source", "category", "count", "status"]
+        lines.append("| " + " | ".join(cols) + " |")
+        lines.append("| " + " | ".join(["---"] * len(cols)) + " |")
+        for row in functional_category_rows:
+            lines.append("| " + " | ".join(str(row.get(col, "")) for col in cols) + " |")
+    else:
+        lines.append("No functional-category rows were generated.")
+    lines.append("")
     return "\n".join(lines)
 
 
@@ -794,6 +812,7 @@ def main() -> int:
     parser.add_argument("--crispr-summary", required=True, type=Path)
     parser.add_argument("--optional-summary", required=True, type=Path)
     parser.add_argument("--optional-metrics", required=True, type=Path)
+    parser.add_argument("--functional-categories", required=True, type=Path)
     parser.add_argument("--pangenome-method", required=True)
     parser.add_argument("--output-mode", required=True)
     parser.add_argument("--min-orf-aa", required=True)
@@ -857,6 +876,7 @@ def main() -> int:
     crispr_summary = read_key_value(args.crispr_summary)
     optional_summary_rows = read_rows(args.optional_summary)
     optional_metric_rows = read_rows(args.optional_metrics)
+    functional_category_rows = read_rows(args.functional_categories)
 
     write_key_value(tables_dir / "validation_summary.tsv", validation)
     write_rows(tables_dir / "fasta_stats_combined.tsv", fasta_rows)
@@ -891,6 +911,7 @@ def main() -> int:
     shutil.copyfile(args.crispr_summary, tables_dir / "crispr_spacer_summary.tsv")
     shutil.copyfile(args.optional_summary, tables_dir / "optional_tool_summary.tsv")
     shutil.copyfile(args.optional_metrics, tables_dir / "optional_tool_metrics.tsv")
+    shutil.copyfile(args.functional_categories, tables_dir / "functional_category_summary.tsv")
     claim_rows = claim_evidence_rows(
         validation,
         cohort_summary,
@@ -914,6 +935,7 @@ def main() -> int:
         crispr_summary,
         optional_summary_rows,
         optional_metric_rows,
+        functional_category_rows,
     )
     write_rows(tables_dir / "claim_evidence_matrix.tsv", claim_rows)
 
@@ -941,6 +963,8 @@ def main() -> int:
         "optional_artifacts_available": str(sum(1 for row in optional_summary_rows if row.get("status") == "available")),
         "optional_metric_rows": str(len(optional_metric_rows)),
         "optional_metrics_available": str(sum(1 for row in optional_metric_rows if row.get("status") == "available")),
+        "functional_category_rows": str(len(functional_category_rows)),
+        "functional_categories_available": str(sum(1 for row in functional_category_rows if row.get("status") == "available")),
         "output_mode": args.output_mode,
         "min_orf_aa": args.min_orf_aa,
         "kmer_size": args.kmer_size,
@@ -1000,6 +1024,7 @@ def main() -> int:
         ("table", "tables/crispr_spacer_summary.tsv", "CRISPR spacer matching summary"),
         ("table", "tables/optional_tool_summary.tsv", "Optional-tool artifact status, shapes, sizes, and checksums"),
         ("table", "tables/optional_tool_metrics.tsv", "Optional-tool high-level metric counts without annotation values"),
+        ("table", "tables/functional_category_summary.tsv", "Broad functional-category counts from consistent heavy annotation outputs"),
         ("qa", "tables/claim_evidence_matrix.tsv", "Software claim-to-artifact evidence matrix"),
     ]
     for path in figure_paths:
@@ -1038,6 +1063,8 @@ def main() -> int:
         "optional_artifacts_available": sum(1 for row in optional_summary_rows if row.get("status") == "available"),
         "optional_metric_rows": len(optional_metric_rows),
         "optional_metrics_available": sum(1 for row in optional_metric_rows if row.get("status") == "available"),
+        "functional_category_rows": len(functional_category_rows),
+        "functional_categories_available": sum(1 for row in functional_category_rows if row.get("status") == "available"),
         "claim_evidence_rows": len(claim_rows),
         "output_mode": args.output_mode,
         "pangenome_method": args.pangenome_method,
@@ -1063,14 +1090,16 @@ def main() -> int:
         "optional_artifacts_available": str(sum(1 for row in optional_summary_rows if row.get("status") == "available")),
         "optional_metric_rows": str(len(optional_metric_rows)),
         "optional_metrics_available": str(sum(1 for row in optional_metric_rows if row.get("status") == "available")),
+        "functional_category_rows": str(len(functional_category_rows)),
+        "functional_categories_available": str(sum(1 for row in functional_category_rows if row.get("status") == "available")),
         "claim_evidence_rows": str(len(claim_rows)),
         "output_mode": args.output_mode,
     }
     write_key_value(args.runtime_summary, runtime)
 
-    html_text = build_html(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_rows, host_adaptation_rows, crispr_match_rows, crispr_summary, intergenomic_pair_rows, reference_pair_rows, reference_nearest_rows, marker_presence_rows, marker_topology_rows, marker_provenance_rows, optional_summary_rows, optional_metric_rows, claim_rows, figure_paths, important_files)
+    html_text = build_html(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_rows, host_adaptation_rows, crispr_match_rows, crispr_summary, intergenomic_pair_rows, reference_pair_rows, reference_nearest_rows, marker_presence_rows, marker_topology_rows, marker_provenance_rows, optional_summary_rows, optional_metric_rows, functional_category_rows, claim_rows, figure_paths, important_files)
     args.output_html.write_text(html_text)
-    args.output_md.write_text(build_markdown(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_adaptation_rows, crispr_match_rows, intergenomic_pair_rows, reference_nearest_rows, marker_topology_rows, optional_summary_rows, optional_metric_rows))
+    args.output_md.write_text(build_markdown(args, validation, cohort_summary, intergenomic_summary, reference_summary, marker_summary, pangenome_summary, fasta_rows, codon_rows, host_adaptation_rows, crispr_match_rows, intergenomic_pair_rows, reference_nearest_rows, marker_topology_rows, optional_summary_rows, optional_metric_rows, functional_category_rows))
     return 0
 
 

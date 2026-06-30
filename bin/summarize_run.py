@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from artifact_inventory import collect_artifact_summary
+from functional_category_summary import collect_functional_category_rows, summarize_rows as summarize_functional_rows
 from optional_tool_metrics import collect_optional_metric_rows, summarize_metric_rows
 from optional_tool_summary import collect_optional_rows, summarize_rows as summarize_optional_rows
 from pangenome_sensitivity import report_import_summary
@@ -63,6 +64,9 @@ def main() -> int:
             phabox_artifacts=[],
             clinker_artifacts=[],
         )
+    )
+    summary["functional_category_summary"] = summarize_functional_rows(
+        collect_functional_category_rows(samplesheet=None, root=args.outdir, pharokka_artifacts=[])
     )
     summary["pangenome_sensitivity_summary"] = report_import_summary(args.outdir)
     text = json.dumps(summary, sort_keys=True, separators=(",", ":")) if args.compact else json.dumps(summary, indent=2)

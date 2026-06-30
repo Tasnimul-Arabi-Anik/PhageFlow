@@ -96,6 +96,10 @@ bash bin/phageflow optional-summary \
 bash bin/phageflow optional-metrics \
   --root results/my_phage \
   --output results/my_phage_optional_tool_metrics.tsv
+
+bash bin/phageflow functional-summary \
+  --root results/my_phage \
+  --output results/my_phage_functional_category_summary.tsv
 ```
 
 Run the optional container smoke test when Docker is available:
@@ -297,6 +301,7 @@ Outputs are written under `--outdir`:
 - `99_report/tables/marker_provenance.tsv`: marker alignment/tree provenance table when marker-tree outputs are enabled.
 - `99_report/tables/optional_tool_summary.tsv`: optional tRNAscan-SE/BACPHLIP/ABRicate/CheckV/Pharokka/geNomad/Phold/clinker/iPHoP/PhaBOX artifact status, table shapes, sizes, and checksums.
 - `99_report/tables/optional_tool_metrics.tsv`: compact optional-tool metric counts from stable high-level outputs without printing annotation, taxonomy, host-prediction, or feature values.
+- `99_report/tables/functional_category_summary.tsv`: broad functional-category counts from consistent heavy annotation outputs such as Pharokka category tables.
 - `99_report/important_files.tsv`: important output manifest.
 - `99_report/validation_manifest.json`: report-level QA manifest.
 - `99_report/software_versions.tsv`: software/runtime version capture.
@@ -347,11 +352,12 @@ bash bin/phageflow summarize --outdir phageflow_validation_mmseqs --output /tmp/
 bash bin/phageflow safety-summary --outdir phageflow_validation_mmseqs --output /tmp/phageflow_safety_summary.tsv
 bash bin/phageflow optional-summary --root phageflow_validation_mmseqs --output /tmp/phageflow_optional_tool_summary.tsv
 bash bin/phageflow optional-metrics --root phageflow_validation_mmseqs --output /tmp/phageflow_optional_tool_metrics.tsv
+bash bin/phageflow functional-summary --root phageflow_validation_mmseqs --output /tmp/phageflow_functional_category_summary.tsv
 bash bin/phageflow structural-summary --outdir phageflow_validation_mmseqs --output /tmp/phageflow_structural_summary.tsv
 bash bin/phageflow package --outdir phageflow_validation_mmseqs --output /tmp/phageflow_package.tar.gz
 ```
 
-`summarize` reports sanitized artifact counts, anonymous TSV/figure IDs, file sizes, checksums, validation-manifest status, optional-screen artifact status, optional-tool artifact status, optional-tool metric status, imported pangenome-sensitivity status, structural-artifact status, and generic PASS/FAIL/WARN/ERROR marker counts. `safety-summary` reports optional safety-related artifact presence and row counts without printing feature names. `optional-summary` reports optional-tool artifact presence, table shapes, sizes, and checksums without printing annotation values. `optional-metrics` reports compact high-level metric counts without printing annotation, taxonomy, host-prediction, or feature values. `structural-summary` reports structural-annotation artifact classes, table shapes, sizes, and checksums without printing annotation values. `package` creates a report/QA archive with relative paths, package checksums, optional-screen, optional-tool, optional-metric, pangenome-sensitivity, and structural summaries, and the sanitized artifact summary.
+`summarize` reports sanitized artifact counts, anonymous TSV/figure IDs, file sizes, checksums, validation-manifest status, optional-screen artifact status, optional-tool artifact status, optional-tool metric status, functional-category status, imported pangenome-sensitivity status, structural-artifact status, and generic PASS/FAIL/WARN/ERROR marker counts. `safety-summary` reports optional safety-related artifact presence and row counts without printing feature names. `optional-summary` reports optional-tool artifact presence, table shapes, sizes, and checksums without printing annotation values. `optional-metrics` reports compact high-level metric counts without printing annotation, taxonomy, host-prediction, or feature values. `functional-summary` reports broad category counts from consistent heavy annotation outputs without printing individual gene/product annotations. `structural-summary` reports structural-annotation artifact classes, table shapes, sizes, and checksums without printing annotation values. `package` creates a report/QA archive with relative paths, package checksums, optional-screen, optional-tool, optional-metric, functional-category, pangenome-sensitivity, and structural summaries, and the sanitized artifact summary.
 
 Compare completed pangenome runs:
 

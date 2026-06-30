@@ -268,6 +268,8 @@ process OPTIONAL_TOOL_SUMMARY {
     path "optional_tool_summary.json", emit: summary_json
     path "optional_tool_metrics.tsv", emit: metrics
     path "optional_tool_metrics.json", emit: metrics_json
+    path "functional_category_summary.tsv", emit: functional_categories
+    path "functional_category_summary.json", emit: functional_categories_json
 
     script:
     def trnascanArgs = trnascan_artifacts.collect { "--trnascan-artifact ${it}" }.join(' ')
@@ -318,5 +320,10 @@ process OPTIONAL_TOOL_SUMMARY {
         ${clinkerArgs} \
         --output optional_tool_metrics.tsv \
         --summary-json optional_tool_metrics.json
+    python3 ${projectDir}/bin/functional_category_summary.py \
+        --samplesheet "${samplesheet}" \
+        ${pharokkaArgs} \
+        --output functional_category_summary.tsv \
+        --summary-json functional_category_summary.json
     """
 }

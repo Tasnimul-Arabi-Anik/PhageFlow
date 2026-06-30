@@ -40,6 +40,7 @@ This matrix separates validated lightweight defaults from heavy optional modules
 | --- | --- | --- | --- |
 | Optional-tool artifact inventory | Existing optional output directories. | `phageflow optional-summary --root RUN` | Presence, shape, size, checksum only. |
 | Optional-tool metric counts | Existing optional output directories. | `phageflow optional-metrics --root RUN` | Counted stable fields only; raw values are not printed. |
+| Functional-category counts | Existing Pharokka-style category tables. | `phageflow functional-summary --root RUN` | Broad category counts only; individual gene/product annotations are not printed. |
 | Pangenome sensitivity | Completed MMseqs/RBH or other completed-run pangenome comparisons. | `phageflow pangenome-sensitivity --left RUN_A --right RUN_B --import-to-report RUN_A` | Metric deltas only. |
 | Structural artifacts | Existing Phold-like structural directories. | `phageflow structural-summary --outdir RUN` | Artifact classes, shapes, sizes, checksums. |
 | PhaBOX/PhaBOX2 | Completed PhaBOX/PhaBOX2 result directory named or passed as `<sample_id>.phabox`. | `--phabox-artifact PATH` or `05_optional/phabox/<sample_id>.phabox`. | Import-only counts/checksums; wrapper execution deferred. |
@@ -56,6 +57,6 @@ This matrix separates validated lightweight defaults from heavy optional modules
 
 ## Next High-Value Additions
 
-1. Functional-category count summaries from consistent heavy annotation outputs, especially Pharokka/PHROG-style tables.
-2. Optional import summary for vConTACT2-style network outputs, if users already have completed network analyses.
-3. A small release checklist for deciding whether an output is default, heavy optional, import-only, or deferred.
+1. Optional import summary for vConTACT2-style network outputs, if users already have completed network analyses.
+2. A small release checklist for deciding whether an output is default, heavy optional, import-only, or deferred.
+3. Wrapper execution for PhaBOX/PhaBOX2 only after a stable local CLI/database validation pass.

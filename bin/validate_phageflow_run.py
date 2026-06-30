@@ -44,6 +44,7 @@ REQUIRED_TABLES = [
     "crispr_spacer_summary.tsv",
     "optional_tool_summary.tsv",
     "optional_tool_metrics.tsv",
+    "functional_category_summary.tsv",
 ]
 
 OPTIONAL_GROUPS = {

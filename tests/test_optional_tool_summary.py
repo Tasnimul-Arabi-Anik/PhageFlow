@@ -43,7 +43,7 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     write(bacphlip, "completed\n")
     write(abricate, "file\tsequence\tstart\tend\n")
     write(checkv / "quality_summary.tsv", "contig_id\tcontig_length\ncontig1\t1000\n")
-    write(pharokka / "sample_a_cds_functions.tsv", "gene\tfunction\nx\ty\n")
+    write(pharokka / "sample_a_cds_functions.tsv", "gene\tfunction\tphrog_category\nx\ty\tDNA metabolism\nz\tq\tDNA metabolism\n")
     write(genomad / "sample_a_summary.tsv", "seq_name\tlength\ncontig1\t1000\n")
     write(phold / "sample_a_confidence.tsv", "cds\tconfidence\ncds1\t0.9\n")
     write(iphop / "Host_prediction_to_genus_m90.csv", "Virus,Host genus,Score\ncontig1,host_a,95\n")
@@ -55,6 +55,8 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     summary_json = tmp_path / "optional_tool_summary.json"
     metrics_output = tmp_path / "optional_tool_metrics.tsv"
     metrics_json = tmp_path / "optional_tool_metrics.json"
+    functional_output = tmp_path / "functional_category_summary.tsv"
+    functional_json = tmp_path / "functional_category_summary.json"
     common_args = [
         "--samplesheet",
         str(samplesheet),
@@ -137,7 +139,7 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     metric_rows = list(csv.DictReader(metrics_output.open(), delimiter="\t"))
     metric_index = {(row["tool"], row["sample_id"], row["metric"]): row for row in metric_rows}
     assert metric_index[("checkv", "sample_a", "quality_summary_records")]["value"] == "1"
-    assert metric_index[("pharokka", "sample_a", "annotation_records")]["value"] == "1"
+    assert metric_index[("pharokka", "sample_a", "annotation_records")]["value"] == "2"
     assert metric_index[("genomad", "sample_a", "classification_records")]["value"] == "1"
     assert metric_index[("phold", "sample_a", "structural_annotation_records")]["value"] == "1"
     assert metric_index[("iphop", "sample_a", "host_prediction_records")]["value"] == "1"
@@ -145,6 +147,28 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     assert metric_index[("clinker", "COHORT", "genbank_inputs_listed")]["value"] == "2"
     metrics_summary = json.loads(metrics_json.read_text())
     assert metrics_summary["available_metric_rows"] > 0
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(REPO / "bin" / "functional_category_summary.py"),
+            "--samplesheet",
+            str(samplesheet),
+            "--pharokka-artifact",
+            str(pharokka),
+            "--output",
+            str(functional_output),
+            "--summary-json",
+            str(functional_json),
+        ],
+        check=True,
+    )
+    functional_rows = list(csv.DictReader(functional_output.open(), delimiter="\t"))
+    functional_index = {(row["sample_id"], row["category"]): row for row in functional_rows}
+    assert functional_index[("sample_a", "DNA metabolism")]["count"] == "2"
+    assert any(row["sample_id"] == "sample_b" and row["status"] == "not_run" for row in functional_rows)
+    functional_summary = json.loads(functional_json.read_text())
+    assert functional_summary["available_category_rows"] == 1
 
 
 def run_completed_utility_regression(tmp_path: Path) -> None:
@@ -175,6 +199,7 @@ def run_completed_utility_regression(tmp_path: Path) -> None:
     assert summary["optional_tool_summary"]["tool_counts"]["phabox"] == 1
     assert summary["optional_tool_metrics_summary"]["tool_counts"]["iphop"] == 1
     assert summary["optional_tool_metrics_summary"]["tool_counts"]["phabox"] == 1
+    assert summary["functional_category_summary"]["status_counts"]["not_run"] == 1
 
     subprocess.run(
         [
@@ -192,6 +217,7 @@ def run_completed_utility_regression(tmp_path: Path) -> None:
         names = set(tar.getnames())
     assert "phageflow_package/phageflow_optional_tool_summary.tsv" in names
     assert "phageflow_package/phageflow_optional_tool_metrics.tsv" in names
+    assert "phageflow_package/phageflow_functional_category_summary.tsv" in names
 
 
 def main() -> int:
