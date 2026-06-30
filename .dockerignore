@@ -1,3 +1,4 @@
+.git/
 .phageflow-env/
 validation/
 **/__pycache__/

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static-checks:
+    name: Static checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile Python utilities
+        run: python3 -m py_compile bin/*.py
+
+      - name: Check shell script syntax
+        run: bash -n bin/phageflow bin/run_local_validation.sh bin/container_smoke_test.sh
+
+      - name: Validate bundled inputs
+        run: |
+          python3 bin/validate_samplesheet.py \
+            --input assets/test_data/phage_samplesheet.tsv \
+            --outdir /tmp/phage_samplesheet_validation
+          python3 bin/validate_samplesheet.py \
+            --input assets/test_data/toy_phage_a.fasta \
+            --outdir /tmp/single_fasta_validation
+
+      - name: Check tracked repository size
+        run: |
+          tracked_bytes="$(git ls-files -z | xargs -0 du -cb | tail -n 1 | cut -f1)"
+          echo "Tracked bytes: ${tracked_bytes}"
+          test "${tracked_bytes}" -lt 50000000

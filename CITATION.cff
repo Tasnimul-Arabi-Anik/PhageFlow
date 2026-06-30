@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use PhageFlow, please cite it using this metadata."
+title: "PhageFlow"
+version: "0.2.0-dev"
+date-released: 2026-06-30
+authors:
+  - given-names: "Tasnimul"
+    family-names: "Arabi Anik"
+repository-code: "https://github.com/Tasnimul-Arabi-Anik/PhageFlow"
+license: MIT
+keywords:
+  - bacteriophage
+  - genomics
+  - nextflow
+  - workflow
+  - comparative-genomics

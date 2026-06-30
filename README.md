@@ -1,18 +1,22 @@
 # PhageFlow
 
+[![CI](https://github.com/Tasnimul-Arabi-Anik/PhageFlow/actions/workflows/ci.yml/badge.svg)](https://github.com/Tasnimul-Arabi-Anik/PhageFlow/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Compact Nextflow workflow for reproducible in-silico analysis of already sequenced bacteriophage genomes.
 
 PhageFlow now treats Nextflow as the single normal execution layer. The previous `../pangenome/` Snakemake workflow is retained only as a deprecated parity backend for one release; new runs should use native `mmseqs` or `rbh_blastp` pangenome methods.
 
 ## Current Status
 
-PhageFlow is functionally complete and validated for the current lightweight single-genome and small-cohort genome-analysis scope. The release-status label for this state is `v0.1.0-validated`.
+PhageFlow is functionally complete and validated for the current lightweight single-genome and small-cohort genome-analysis scope. The first strict-validation milestone is `v0.1.0-validated`; the current repository state is `v0.2.0-dev`, which adds completed-run QA, packaging, provenance, and release-polish utilities on top of the validated core.
 
 This is a software/workflow validation statement only. Biological interpretation, manuscript-grade conclusions, and project-specific claims remain outside the pipeline validation scope. See [`docs/validation_status.md`](docs/validation_status.md) for the validation evidence and boundaries, and [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for the release-state summary.
 
 The proposed v0.2 extension plan is reviewed in [`docs/v0.2_extension_review.md`](docs/v0.2_extension_review.md). It prioritizes software-facing QA, packaging, and conservative artifact summaries before heavier optional analyses.
 Current v0.2 progress is tracked in [`docs/v0.2_roadmap_status.md`](docs/v0.2_roadmap_status.md).
 The v0.2 completion audit is in [`docs/v0.2_completion_audit.md`](docs/v0.2_completion_audit.md).
+The next optional-analysis roadmap is in [`docs/v0.3_analysis_roadmap.md`](docs/v0.3_analysis_roadmap.md).
 
 ## What It Does
 
@@ -340,3 +344,9 @@ nextflow run phageflow/main.nf -profile docker --input phage_samplesheet.tsv
 ## Publication Note
 
 The bundled lightweight ORF predictor exists to keep tests and scaffolding reproducible without heavy databases. For final manuscript-grade biology, run a consistent phage annotation backend such as Pharokka/PHANOTATE across every genome before interpreting pangenome content and marker selection.
+
+## Citation, License, And Contributions
+
+Use [`CITATION.cff`](CITATION.cff) for citation metadata. PhageFlow is distributed under the [`MIT License`](LICENSE).
+
+Contribution guidance is in [`CONTRIBUTING.md`](CONTRIBUTING.md), release readiness checks are in [`docs/release_checklist.md`](docs/release_checklist.md), and security/data-boundary notes are in [`SECURITY.md`](SECURITY.md).

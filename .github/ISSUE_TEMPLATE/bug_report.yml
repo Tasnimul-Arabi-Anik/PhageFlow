@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a reproducible PhageFlow software or workflow problem.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please avoid pasting sensitive sequences, private metadata, or full result tables.
+  - type: input
+    id: version
+    attributes:
+      label: PhageFlow version or commit
+      placeholder: "v0.2.0-dev or git commit"
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Execution mode
+      options:
+        - local
+        - conda
+        - docker
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      description: Redact private paths or sample names if needed.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation output
+      description: Paste validator or CI output when available.
+      render: text
+    validations:
+      required: false

@@ -19,7 +19,7 @@ Scope boundaries:
 
 Remaining work is release polish: README and example-command refinement, packaging/container checks, and clear labeling of demo or stress-test outputs versus outputs suitable for formal reporting.
 
-## v0.2.0-dev
+## v0.2.0-dev - 2026-06-30
 
 Initial v0.2 planning and utility work:
 
@@ -35,3 +35,11 @@ Initial v0.2 planning and utility work:
 - Added `.dockerignore` and a host-UID container smoke-test path so container outputs remain host-writable.
 - Added local-validation hooks for summarize/safety/structural/package utilities.
 - Added `docs/v0.2_completion_audit.md` documenting implemented, validated, deferred, and avoided roadmap items.
+
+Release polish:
+
+- Added MIT license metadata, citation metadata, contribution guidance, security notes, and release checklist.
+- Added GitHub Actions static CI for Python compilation, shell syntax checks, bundled samplesheet validation, and tracked-size guardrails.
+- Added GitHub issue templates and pull request checklist.
+- Clarified README status so `v0.1.0-validated` is the first strict-validation milestone and `v0.2.0-dev` is the current development state.
+- Added `docs/v0.3_analysis_roadmap.md` ranking future optional-analysis additions without copying whole external pipelines.
