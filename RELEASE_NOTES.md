@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- No unreleased changes.
+
+## v0.4.0-validated - 2026-07-01
+
+PhageFlow v0.4.0 is validated as a local, reproducible software workflow for lightweight single-genome and small-cohort phage genome analysis with heavier modules kept disabled by default. This release expands optional analysis coverage, completed-run QA summaries, report imports, and handoff documentation while preserving conservative software-artifact claims.
+
+Validation state:
+
+- Python utility and regression checks passed, including optional-summary, validator-optionals, lightweight metrics, pangenome-sensitivity, and network-context tests.
+- Shell syntax checks passed.
+- Full local validation suite passed, including MMseqs, RBH-BLASTP, single-genome, marker-tree, completed-run summary utilities, pangenome-sensitivity import, and package export.
+- Container smoke test passed when Docker was available.
+- GitHub CI passed for the PhaBOX2 wrapper baseline commit `4efb1bd`; GitHub static CI remains the required remote gate before tagging.
+
 v0.4 analysis-expansion first pass:
 
 - Expanded optional summaries to include tRNAscan-SE, BACPHLIP, and ABRicate artifacts while keeping optional modules disabled by default.

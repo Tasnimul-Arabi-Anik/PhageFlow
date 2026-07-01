@@ -7,6 +7,7 @@ Use this checklist before tagging a PhageFlow release.
 - [ ] `README.md` status matches the intended release label.
 - [ ] `RELEASE_NOTES.md` includes the release date and validation summary.
 - [ ] `CITATION.cff` version and date are current.
+- [ ] Release validation evidence is recorded in `docs/v0.4_release_validation.md` or the current release-equivalent file.
 - [ ] `LICENSE` is present and matches the intended distribution terms.
 - [ ] GitHub issue templates and PR template are present.
 

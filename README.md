@@ -9,11 +9,11 @@ PhageFlow now treats Nextflow as the single normal execution layer. The previous
 
 ## Current Status
 
-PhageFlow is functionally complete and validated for the current lightweight single-genome and small-cohort genome-analysis scope. The current release state is `v0.3.0-validated`, which includes completed-run QA, packaging, provenance, optional-tool artifact summaries, local reference-context reporting, and release validation on top of the original validated core.
+PhageFlow is functionally complete and validated for the current lightweight single-genome and small-cohort genome-analysis scope. The current release state is `v0.4.0-validated`, which includes completed-run QA, packaging, provenance, optional-tool artifact and metric summaries, local reference-context reporting, pangenome-sensitivity import, functional-category and network-context summaries, and disabled-by-default iPHoP/PhaBOX2 heavy optional wrappers.
 
-This is a software/workflow validation statement only. Biological interpretation, manuscript-grade conclusions, and project-specific claims remain outside the pipeline validation scope. See [`docs/validation_status.md`](docs/validation_status.md) for the validation evidence and boundaries, and [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for the release-state summary.
+This is a software/workflow validation statement only. Biological interpretation, manuscript-grade conclusions, and project-specific claims remain outside the pipeline validation scope. See [`docs/validation_status.md`](docs/validation_status.md) and [`docs/v0.4_release_validation.md`](docs/v0.4_release_validation.md) for validation evidence and boundaries, and [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for the release-state summary.
 
-The v0.2 extension review, roadmap status, and completion audit are preserved in [`docs/v0.2_extension_review.md`](docs/v0.2_extension_review.md), [`docs/v0.2_roadmap_status.md`](docs/v0.2_roadmap_status.md), and [`docs/v0.2_completion_audit.md`](docs/v0.2_completion_audit.md). The v0.3 analysis roadmap is in [`docs/v0.3_analysis_roadmap.md`](docs/v0.3_analysis_roadmap.md); the active v0.4 lightweight/heavy expansion audit, capability matrix, and progress notes are in [`docs/v0.4_analysis_expansion_audit.md`](docs/v0.4_analysis_expansion_audit.md), [`docs/analysis_capability_matrix.md`](docs/analysis_capability_matrix.md), and [`docs/v0.4_progress.md`](docs/v0.4_progress.md).
+The v0.2 extension review, roadmap status, and completion audit are preserved in [`docs/v0.2_extension_review.md`](docs/v0.2_extension_review.md), [`docs/v0.2_roadmap_status.md`](docs/v0.2_roadmap_status.md), and [`docs/v0.2_completion_audit.md`](docs/v0.2_completion_audit.md). The v0.3 analysis roadmap is in [`docs/v0.3_analysis_roadmap.md`](docs/v0.3_analysis_roadmap.md); the v0.4 lightweight/heavy expansion audit, capability matrix, and progress notes are in [`docs/v0.4_analysis_expansion_audit.md`](docs/v0.4_analysis_expansion_audit.md), [`docs/analysis_capability_matrix.md`](docs/analysis_capability_matrix.md), and [`docs/v0.4_progress.md`](docs/v0.4_progress.md).
 
 ## What It Does
 
@@ -174,6 +174,7 @@ Single phage:
 
 ```bash
 nextflow run main.nf --input my_phage.fasta --outdir results/my_phage
+bash bin/phageflow validate --outdir results/my_phage
 ```
 
 User cohort with default MMseqs pangenome:
@@ -183,6 +184,10 @@ nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --pangenome_method mmseqs \
   --outdir results/phage_cohort
+
+bash bin/phageflow validate \
+  --outdir results/phage_cohort \
+  --require-pangenome-rows
 ```
 
 Conservative RBH-BLASTP comparison backend:
@@ -201,6 +206,10 @@ nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --host_samplesheet host_samplesheet.tsv \
   --outdir results/phage_host_context
+
+bash bin/phageflow validate \
+  --outdir results/phage_host_context \
+  --expect-host-adaptation
 ```
 
 Sanitized summary for a completed run:
@@ -274,6 +283,36 @@ nextflow run main.nf \
 ```
 
 PhaBOX2 outputs are summarized as optional artifacts and metric counts only. Taxonomy, lifestyle, host-prediction, and annotation values remain external-tool evidence and are not interpreted by PhageFlow.
+
+Combined heavy optional validation template:
+
+```bash
+bash bin/phageflow install --with publication,host-prediction,integrated
+nextflow run main.nf \
+  --input phage_samplesheet.tsv \
+  --run_trnascan true \
+  --run_bacphlip true \
+  --run_checkv true \
+  --checkv_db /path/to/checkv_db \
+  --run_abricate true \
+  --run_pharokka true \
+  --pharokka_db /path/to/pharokka_db \
+  --run_genomad true \
+  --genomad_db /path/to/genomad_db \
+  --run_clinker true \
+  --run_iphop true \
+  --iphop_db /path/to/iphop_db \
+  --run_phabox true \
+  --phabox_db /path/to/phabox_db \
+  --outdir results/phage_heavy_optional
+
+bash bin/phageflow validate \
+  --outdir results/phage_heavy_optional \
+  --require-pangenome-rows \
+  --expect-publication-optionals \
+  --expect-iphop \
+  --expect-phabox
+```
 
 Marker-gene phylogeny from user-supplied marker proteins:
 

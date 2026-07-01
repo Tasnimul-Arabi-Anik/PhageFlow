@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use PhageFlow, please cite it using this metadata."
 title: "PhageFlow"
-version: "0.3.0-validated"
+version: "0.4.0-validated"
 date-released: 2026-07-01
 authors:
   - given-names: "Tasnimul"

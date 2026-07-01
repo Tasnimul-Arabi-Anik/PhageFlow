@@ -1,12 +1,12 @@
 # PhageFlow Validation Status
 
-Status: `v0.3.0-validated`
+Status: `v0.4.0-validated`
 
 Validation date: 2026-07-01
 
 ## Scope
 
-PhageFlow is complete for the current lightweight single-genome and small-cohort genome-analysis scope. This status covers software workflow execution, report generation, validation checks, completed-run QA utilities, optional artifact summaries, local reference-context reporting, container smoke validation, and package export. It does not claim domain interpretation or manuscript-grade biological conclusions.
+PhageFlow is complete for the current lightweight single-genome and small-cohort genome-analysis scope. This status covers software workflow execution, report generation, validation checks, completed-run QA utilities, optional artifact and metric summaries, local reference-context reporting, optional heavy wrapper contracts, container smoke validation, and package export. It does not claim domain interpretation or manuscript-grade biological conclusions.
 
 ## Completed
 
@@ -17,16 +17,23 @@ PhageFlow is complete for the current lightweight single-genome and small-cohort
 - Optional host-context artifact branch.
 - CLI install, doctor, run, test, and validate commands.
 - Report generation with tables, figures, manifests, versions, parameters, and runtime summaries.
-- Completed-run summarize, safety-summary, optional-summary, structural-summary, pangenome-sensitivity, and package utilities.
-- Optional-tool artifact summaries for CheckV, Pharokka, geNomad, Phold, and clinker.
+- Completed-run summarize, safety-summary, optional-summary, optional-metrics, functional-summary, network-summary, structural-summary, pangenome-sensitivity, and package utilities.
+- Optional-tool artifact and metric summaries for tRNAscan-SE, BACPHLIP, ABRicate, CheckV, Pharokka, geNomad, Phold, clinker, iPHoP, and PhaBOX/PhaBOX2.
+- Disabled-by-default iPHoP and PhaBOX2 wrapper contracts with explicit user-provided database paths.
+- Report-import support for completed pangenome-sensitivity comparisons and completed vConTACT2-style network summaries.
 - Local reference-context branch for samplesheets with `role=reference`.
-- Strict validator coverage for pangenome rows, marker-tree outputs, host-context outputs, CRISPR spacer hits, optional-module outputs, and local reference-context outputs when requested.
+- Strict validator coverage for pangenome rows, marker-tree outputs, host-context outputs, CRISPR spacer hits, optional-module outputs, optional summary/metric rows, and local reference-context outputs when requested.
 
 ## Validation Evidence
 
-Release validation commands for `v0.3.0-validated`:
+Release validation commands for `v0.4.0-validated`:
 
-- `python3 -m py_compile bin/*.py`
+- `python3 -m py_compile bin/*.py tests/*.py`
+- `python3 tests/test_optional_tool_summary.py`
+- `python3 tests/test_validator_optionals.py`
+- `python3 tests/test_lightweight_metrics.py`
+- `python3 tests/test_pangenome_sensitivity.py`
+- `python3 tests/test_network_context_summary.py`
 - `bash -n bin/phageflow bin/run_local_validation.sh bin/container_smoke_test.sh`
 - `git diff --check`
 - `bash bin/run_local_validation.sh`
@@ -39,6 +46,9 @@ Release validation outcomes:
 - Package export from completed run: passed.
 - Local reference-context validator check: passed in bundled cohort validation runs.
 - Marker-tree validator check: passed in bundled marker-tree validation run.
+- Default PhaBOX2 behavior check: disabled optional module reports `not_run`.
+- Missing PhaBOX2 database check: `--run_phabox true` exits with a clear `--phabox_db` requirement.
+- GitHub CI: passed for baseline v0.4 PhaBOX2 wrapper commit `4efb1bd`; GitHub static CI remains the required remote gate before tagging.
 
 Historical `v0.1.0-validated` focused audit:
 
@@ -63,11 +73,11 @@ The historical artifact audit did not rerun the workflow, print table contents, 
 - Manuscript-grade biological conclusion: not claimed.
 - Wet-lab design, engineering, host-range expansion, synthesis, or virulence-enhancement support: not provided by this pipeline.
 
-## Remaining Polish
+## Remaining Deferred Work
 
-Remaining work after `v0.3.0-validated` is future feature work, not release-blocking core validation:
+Remaining work after `v0.4.0-validated` is future feature work, not release-blocking core validation:
 
-- Optional reference package manifest beyond existing run/report manifests.
-- Optional host-prediction wrapper with a local database contract.
-- Pangenome method concordance import into reports.
-- Marker-tree QC dashboard refinements.
+- Public-database taxonomy assignment after a database/version/provenance policy is defined.
+- Metagenomic discovery after a separate input contract and validation dataset exist.
+- Read-based termini or packaging inference after raw-read inputs and validation data exist.
+- vConTACT2-style execution only if a stable database/runtime contract and validation dataset are provided.
