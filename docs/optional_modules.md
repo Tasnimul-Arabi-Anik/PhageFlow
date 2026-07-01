@@ -18,6 +18,7 @@ bash bin/phageflow install --with structure
 bash bin/phageflow install --with phylogeny
 bash bin/phageflow install --with host
 bash bin/phageflow install --with host-prediction
+bash bin/phageflow install --with integrated
 bash bin/phageflow install --with all
 ```
 
@@ -29,9 +30,10 @@ Groups:
 - `phylogeny`: MAFFT, IQ-TREE, trimAl, and Biopython for marker-gene trees.
 - `host`: Prodigal and minced for optional host-context enrichment.
 - `host-prediction`: iPHoP for optional database-backed host prediction.
-- `all`: `publication` plus `structure`, `phylogeny`, `host`, and `host-prediction`.
+- `integrated`: PhaBOX2 for optional broad classification, host, lifestyle, and related context.
+- `all`: `publication` plus `structure`, `phylogeny`, `host`, `host-prediction`, and `integrated`.
 
-The installer handles executables only. Database-heavy tools still require user-provided database paths, for example `--checkv_db`, `--pharokka_db`, `--genomad_db`, and `--iphop_db`.
+The installer handles executables only. Database-heavy tools still require user-provided database paths, for example `--checkv_db`, `--pharokka_db`, `--genomad_db`, `--iphop_db`, and `--phabox_db`.
 
 ## Doctor Checks
 
@@ -40,6 +42,7 @@ bash bin/phageflow doctor --with publication
 bash bin/phageflow doctor --with phylogeny
 bash bin/phageflow doctor --with host
 bash bin/phageflow doctor --with host-prediction
+bash bin/phageflow doctor --with integrated
 bash bin/phageflow doctor --with all
 ```
 
@@ -90,6 +93,14 @@ Validate optional iPHoP host-prediction artifacts after a run with `--run_iphop 
 bash bin/phageflow validate \
   --outdir results/phage_iphop \
   --expect-iphop
+```
+
+Validate optional PhaBOX2 artifacts after a run with `--run_phabox true --phabox_db ...`:
+
+```bash
+bash bin/phageflow validate \
+  --outdir results/phage_phabox \
+  --expect-phabox
 ```
 
 You can also validate individual modules:
@@ -143,11 +154,25 @@ bash bin/phageflow optional-summary \
   --summary-json results/my_run_optional_tool_summary.json
 ```
 
-This table summarizes tRNAscan-SE, BACPHLIP, ABRicate, CheckV, Pharokka, geNomad, Phold, clinker, iPHoP, and imported PhaBOX/PhaBOX2 artifact availability, primary artifact class, table row/column counts, file counts, sizes, and checksums. It intentionally does not print annotation values, host-prediction values, or make biological conclusions.
+This table summarizes tRNAscan-SE, BACPHLIP, ABRicate, CheckV, Pharokka, geNomad, Phold, clinker, iPHoP, and PhaBOX/PhaBOX2 artifact availability, primary artifact class, table row/column counts, file counts, sizes, and checksums. It intentionally does not print annotation values, host-prediction values, or make biological conclusions.
 
-## Imported PhaBOX/PhaBOX2 Artifacts
+## PhaBOX/PhaBOX2 Wrapper And Imports
 
-PhageFlow does not run PhaBOX/PhaBOX2 yet. To include completed PhaBOX/PhaBOX2 outputs in the conservative optional summary layer, pass the output directory explicitly:
+PhaBOX2 is available as a disabled-by-default heavy optional wrapper. It requires a local PhaBOX2 database path:
+
+```bash
+bash bin/phageflow install --with integrated
+nextflow run main.nf \
+  --input phage_samplesheet.tsv \
+  --run_phabox true \
+  --phabox_db /path/to/phabox_db \
+  --phabox_task end_to_end \
+  --outdir results/phage_phabox
+```
+
+Supported `--phabox_task` values are `end_to_end`, `phamer`, `phagcn`, `phatyp`, `cherry`, `phavip`, `contamination`, `votu`, and `tree`. The wrapper writes per-sample directories and logs under `05_optional/phabox/`, then summarizes those artifacts in `optional_tool_summary.tsv` and `optional_tool_metrics.tsv`.
+
+To include already completed PhaBOX/PhaBOX2 outputs in the conservative optional summary layer, pass the output directory explicitly:
 
 ```bash
 bash bin/phageflow optional-summary \

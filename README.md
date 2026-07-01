@@ -30,6 +30,8 @@ This workflow only processes existing sequence files and metadata. It does not p
 For a beginner-friendly copy-paste walkthrough, see [`docs/quickstart.md`](docs/quickstart.md).
 For optional publication modules and strict optional-output validation, see [`docs/optional_modules.md`](docs/optional_modules.md).
 
+For future AI-agent or maintainer handoff guidance, see [`AGENTS.md`](AGENTS.md).
+
 Clone the repository and work from the clone root:
 
 ```bash
@@ -51,7 +53,7 @@ bash bin/phageflow install --with publication
 bash bin/phageflow doctor --with publication
 ```
 
-Optional install groups are `lite`, `publication`, `structure`, `phylogeny`, `host`, `host-prediction`, and `all`. These install executables only; large databases such as CheckV, Pharokka, geNomad, Phold, and iPHoP databases still need to be provided separately with the relevant workflow parameters.
+Optional install groups are `lite`, `publication`, `structure`, `phylogeny`, `host`, `host-prediction`, `integrated`, and `all`. These install executables only; large databases such as CheckV, Pharokka, geNomad, Phold, iPHoP, and PhaBOX2 databases still need to be provided separately with the relevant workflow parameters.
 
 Run a real phage genome with automatic tool detection/installation:
 
@@ -259,6 +261,20 @@ nextflow run main.nf \
 
 iPHoP outputs are summarized as optional artifacts only. Treat predicted-host evidence as computational context, not host-range proof.
 
+Optional integrated PhaBOX2 context:
+
+```bash
+bash bin/phageflow install --with integrated
+nextflow run main.nf \
+  --input phage_samplesheet.tsv \
+  --run_phabox true \
+  --phabox_db /path/to/phabox_db \
+  --phabox_task end_to_end \
+  --outdir results/phage_phabox
+```
+
+PhaBOX2 outputs are summarized as optional artifacts and metric counts only. Taxonomy, lifestyle, host-prediction, and annotation values remain external-tool evidence and are not interpreted by PhageFlow.
+
 Marker-gene phylogeny from user-supplied marker proteins:
 
 ```bash
@@ -297,10 +313,10 @@ Outputs are written under `--outdir`:
 - `04_comparative/marker_phylogeny/`: marker protein selection, alignments, Newick trees, topology consistency table, provenance table, and method note when enabled.
 - `04_comparative/mmseqs_pangenome/`: default pangenome outputs.
 - `04_comparative/rbh_blastp_pangenome/`: conservative RBH pangenome outputs.
-- `05_optional/`: tRNAscan-SE, BACPHLIP, CheckV, ABRicate, Pharokka, geNomad, Phold, clinker, and iPHoP outputs when enabled; PhaBOX/PhaBOX2 outputs can be summarized when imported or copied into `05_optional/phabox/`.
+- `05_optional/`: tRNAscan-SE, BACPHLIP, CheckV, ABRicate, Pharokka, geNomad, Phold, clinker, iPHoP, and PhaBOX/PhaBOX2 outputs when enabled; completed PhaBOX/PhaBOX2 outputs can also be summarized when imported or copied into `05_optional/phabox/`.
 - `06_host_context/`: host-linked nucleotide composition comparison.
 - `99_report/index.html`: HTML dashboard.
-- `99_report/figures/`: PNG, TIFF, PDF, and SVG figures.
+- `99_report/figures/`: 400-dpi PNG/TIFF figures plus PDF/SVG vector exports for publication editing.
 - `99_report/tables/`: key downloadable TSV files.
 - `99_report/tables/claim_evidence_matrix.tsv`: software claim-to-artifact evidence matrix with limitations.
 - `99_report/tables/marker_provenance.tsv`: marker alignment/tree provenance table when marker-tree outputs are enabled.

@@ -441,6 +441,7 @@ def write_software_versions(path: Path) -> None:
         "phold": ["phold", "--version"],
         "clinker": ["clinker", "--version"],
         "iphop": ["iphop", "--version"],
+        "phabox2": ["phabox2", "--help"],
         "prodigal": ["prodigal", "-v"],
         "minced": ["minced", "-h"],
     }

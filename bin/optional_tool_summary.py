@@ -46,7 +46,7 @@ LIMITATIONS = {
     "genomad": "geNomad artifact summary only; classification and taxonomy values are not interpreted.",
     "phold": "Phold artifact summary only; structural annotation values are not printed or interpreted.",
     "iphop": "iPHoP artifact summary only; host-prediction values are not interpreted as host-range evidence.",
-    "phabox": "PhaBOX/PhaBOX2 import summary only; taxonomy, lifestyle, host, and annotation values are not printed or interpreted.",
+    "phabox": "PhaBOX/PhaBOX2 artifact summary only; taxonomy, lifestyle, host, and annotation values are not printed or interpreted.",
     "clinker": "clinker synteny artifact summary only; gene-order visualization is not interpreted.",
 }
 

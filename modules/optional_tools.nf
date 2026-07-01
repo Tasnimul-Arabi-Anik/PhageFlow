@@ -243,6 +243,43 @@ process IPHOP {
     """
 }
 
+process PHABOX {
+    tag "${sample_id}"
+    publishDir "${params.outdir}/05_optional/phabox", mode: 'copy'
+
+    input:
+    tuple val(sample_id), path(fasta), val(role), val(host_id), val(accession)
+
+    output:
+    tuple val(sample_id), path("${sample_id}.phabox"), emit: phabox_dir
+    tuple val(sample_id), path("${sample_id}.phabox.log"), emit: log
+
+    script:
+    """
+    set -euo pipefail
+    PHABOX_DB="${params.phabox_db}"
+    if [ -z "\${PHABOX_DB}" ] || [ "\${PHABOX_DB}" = "null" ]; then
+        echo "ERROR: --phabox_db is required when --run_phabox true" >&2
+        exit 1
+    fi
+    PHABOX_BIN="${params.phabox_bin}"
+    if ! command -v "\${PHABOX_BIN}" >/dev/null 2>&1; then
+        echo "ERROR: PhaBOX2 not found. Install it with conda/mamba or pass --phabox_bin /path/to/phabox2." >&2
+        exit 127
+    fi
+    mkdir -p "${sample_id}.phabox"
+    "\${PHABOX_BIN}" \
+        --task "${params.phabox_task}" \
+        --dbdir "\${PHABOX_DB}" \
+        --outpth "${sample_id}.phabox" \
+        --contigs "${fasta}" \
+        --threads ${task.cpus} \
+        --len ${params.phabox_min_len} \
+        ${params.phabox_extra_args} \
+        > "${sample_id}.phabox.log" 2>&1
+    """
+}
+
 process OPTIONAL_TOOL_SUMMARY {
     tag "optional_tool_summary"
     publishDir "${params.outdir}/05_optional/summary", mode: 'copy'

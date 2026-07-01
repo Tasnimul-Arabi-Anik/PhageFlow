@@ -2,7 +2,7 @@ nextflow.enable.dsl = 2
 
 include { VALIDATE_SAMPLESHEET; FASTA_STATS; SIMPLE_ORF_PREDICT; CODON_USAGE; BUILD_REPORT } from './modules/core'
 include { COHORT_SIMILARITY; INTERGENOMIC_SIMILARITY; NO_INTERGENOMIC_SIMILARITY; REFERENCE_CONTEXT; MARKER_PHYLOGENY; NO_MARKER_PHYLOGENY; MMSEQS_PANGENOME; RBH_PANGENOME; NO_PANGENOME; RUN_LEGACY_SNAKEMAKE_PANGENOME } from './modules/comparative'
-include { TRNASCAN; BACPHLIP; CHECKV; ABRICATE; PHAROKKA; GENOMAD; PHOLD; CLINKER_SYNTENY; IPHOP; OPTIONAL_TOOL_SUMMARY } from './modules/optional_tools'
+include { TRNASCAN; BACPHLIP; CHECKV; ABRICATE; PHAROKKA; GENOMAD; PHOLD; CLINKER_SYNTENY; IPHOP; PHABOX; OPTIONAL_TOOL_SUMMARY } from './modules/optional_tools'
 include { HOST_CONTEXT_LIGHT; NO_HOST_CONTEXT } from './modules/host'
 
 def paramEnabled(value) {
@@ -29,6 +29,11 @@ workflow {
     def allowed_output_modes = ['basic', 'important', 'all']
     if (!allowed_output_modes.contains(params.output_mode as String)) {
         exit 1, "Invalid --output_mode '${params.output_mode}'. Use one of: ${allowed_output_modes.join(', ')}"
+    }
+
+    def allowed_phabox_tasks = ['end_to_end', 'phamer', 'phagcn', 'phatyp', 'cherry', 'phavip', 'contamination', 'votu', 'tree']
+    if (!allowed_phabox_tasks.contains(params.phabox_task as String)) {
+        exit 1, "Invalid --phabox_task '${params.phabox_task}'. Use one of: ${allowed_phabox_tasks.join(', ')}"
     }
 
     resolved_input = params.input as String
@@ -205,7 +210,13 @@ workflow {
         iphop_artifacts_ch = Channel.value([])
         iphop_logs_ch = Channel.value([])
     }
-    phabox_artifacts_ch = Channel.value([])
+
+    if (paramEnabled(params.run_phabox)) {
+        PHABOX(samples_ch)
+        phabox_artifacts_ch = PHABOX.out.phabox_dir.map { sample_id, phabox_dir -> phabox_dir }.collect()
+    } else {
+        phabox_artifacts_ch = Channel.value([])
+    }
 
     OPTIONAL_TOOL_SUMMARY(
         VALIDATE_SAMPLESHEET.out.samplesheet,

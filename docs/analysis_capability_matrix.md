@@ -34,6 +34,7 @@ Before promoting any deferred or import-only capability, apply the analysis scop
 | Structural annotation | Phold | `--run_phold true --phold_db PATH` | Structural annotation artifacts summarized; values are not reinterpreted. |
 | Synteny visualization | clinker | `--run_clinker true` with Pharokka outputs | HTML/alignment artifacts summarized; no gene-order interpretation. |
 | Host prediction | iPHoP | `--run_iphop true --iphop_db PATH` | Host prediction evidence only; not host-range proof. |
+| Integrated context | PhaBOX2 | `--run_phabox true --phabox_db PATH` | Taxonomy, lifestyle, host, and annotation outputs are external-tool evidence only. |
 | Marker phylogeny | MAFFT/IQ-TREE/trimAl or simple backend | `--run_marker_tree true` | Marker-tree context, not standalone taxonomy. |
 
 ## Import-Only Summaries
@@ -46,13 +47,12 @@ Before promoting any deferred or import-only capability, apply the analysis scop
 | Pangenome sensitivity | Completed MMseqs/RBH or other completed-run pangenome comparisons. | `phageflow pangenome-sensitivity --left RUN_A --right RUN_B --import-to-report RUN_A` | Metric deltas only. |
 | Network context | Completed vConTACT2-style overview/network outputs. | `phageflow network-summary --vcontact-dir DIR --import-to-report RUN` | Node/edge/table counts only; no taxonomy assignment or cluster interpretation. |
 | Structural artifacts | Existing Phold-like structural directories. | `phageflow structural-summary --outdir RUN` | Artifact classes, shapes, sizes, checksums. |
-| PhaBOX/PhaBOX2 | Completed PhaBOX/PhaBOX2 result directory named or passed as `<sample_id>.phabox`. | `--phabox-artifact PATH` or `05_optional/phabox/<sample_id>.phabox`. | Import-only counts/checksums; wrapper execution deferred. |
+| PhaBOX/PhaBOX2 imports | Completed PhaBOX/PhaBOX2 result directory named or passed as `<sample_id>.phabox`. | `--phabox-artifact PATH` or `05_optional/phabox/<sample_id>.phabox`. | Counts/checksums only; values are not printed or interpreted. |
 
 ## Deferred
 
 | Candidate | Why deferred |
 | --- | --- |
-| PhaBOX/PhaBOX2 wrapper execution | Valuable but database/CLI contract should be validated separately before PhageFlow runs it. Import-only support is implemented now. |
 | vConTACT2-style network taxonomy | Useful for publication context but heavier, database-dependent, and easy to overclaim. |
 | Read-based termini or packaging inference | Requires raw reads and separate validation data; current FASTA-only termini heuristics are intentionally limited. |
 | Metagenomic viral discovery | Different input contract from assembled phage genome analysis. |
@@ -60,6 +60,6 @@ Before promoting any deferred or import-only capability, apply the analysis scop
 
 ## Next High-Value Additions
 
-1. Wrapper execution for PhaBOX/PhaBOX2 only after a stable local CLI/database validation pass.
-2. Optional public-database taxonomy assignment only after database/version policy is defined.
-3. Read/metagenomic modes only after separate input contracts and validation datasets exist.
+1. Optional public-database taxonomy assignment only after database/version policy is defined.
+2. Read/metagenomic modes only after separate input contracts and validation datasets exist.
+3. vConTACT2-style execution only if a stable database/runtime contract and validation dataset are provided.
