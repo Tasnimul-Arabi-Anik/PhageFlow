@@ -32,6 +32,7 @@ For examples of expected output folders, key report files, and validation comman
 For optional publication modules and strict optional-output validation, see [`docs/optional_modules.md`](docs/optional_modules.md).
 For managed heavy database setup, see [`docs/database_management.md`](docs/database_management.md).
 For report table purposes, column groups, and interpretation boundaries, see [`docs/output_schema.md`](docs/output_schema.md).
+For setup, optional-tool, database, container, and validation troubleshooting, see [`docs/troubleshooting.md`](docs/troubleshooting.md).
 
 For future AI-agent or maintainer handoff guidance, see [`AGENTS.md`](AGENTS.md).
 
