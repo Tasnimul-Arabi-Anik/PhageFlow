@@ -33,7 +33,28 @@ Groups:
 - `integrated`: PhaBOX2 for optional broad classification, host, lifestyle, and related context.
 - `all`: `publication` plus `structure`, `phylogeny`, `host`, `host-prediction`, and `integrated`.
 
-The installer handles executables only. Database-heavy tools still require user-provided database paths, for example `--checkv_db`, `--pharokka_db`, `--genomad_db`, `--iphop_db`, and `--phabox_db`.
+The installer handles executables only. Database-heavy tools still require local database paths, for example `--checkv_db`, `--pharokka_db`, `--genomad_db`, `--phold_db`, `--iphop_db`, and `--phabox_db`.
+
+## Managed Heavy Databases
+
+Use `bin/phageflow db` to prepare optional databases outside the repository:
+
+```bash
+export PHAGEFLOW_DB_ROOT=/mnt/storage/db/phageflow
+bash bin/phageflow db status
+bash bin/phageflow db prepare \
+  --tools publication,structure,host-prediction,integrated \
+  --threads 16 \
+  --dry-run
+```
+
+Remove `--dry-run` to download missing databases. Existing populated database directories are skipped by default; use `bash bin/phageflow db update ...` to fetch fresh copies. After preparation, generate matching Nextflow arguments:
+
+```bash
+bash bin/phageflow db run-args --tools all --shell
+```
+
+See [`database_management.md`](database_management.md) for the full local and `dulab` remote workflow.
 
 ## Doctor Checks
 
@@ -115,6 +136,8 @@ bash bin/phageflow validate \
 
 The optional validator checks software-version records, expected files under `05_optional/`, and report-level rows in `99_report/tables/optional_tool_summary.tsv` for expected optional modules. For example, `lite` validation checks tRNAscan-SE, BACPHLIP, and ABRicate artifacts plus summary rows; Pharokka validation requires per-sample output directories plus GenBank and GFF files; clinker validation checks the synteny HTML, GenBank input list, note file, and report summary row.
 
+Phold validates its database and runs Foldseek as usual. If Phold reports the known no-hit condition for a valid input, PhageFlow keeps the Phold directory, log, and a `phold_no_hits_note.txt` file and treats that as an available no-result optional artifact instead of failing the whole workflow.
+
 To validate only the report-level optional summary after manually inspecting or packaging a completed run:
 
 ```bash
@@ -170,7 +193,7 @@ nextflow run main.nf \
   --outdir results/phage_phabox
 ```
 
-Supported `--phabox_task` values are `end_to_end`, `phamer`, `phagcn`, `phatyp`, `cherry`, `phavip`, `contamination`, `votu`, and `tree`. The wrapper writes per-sample directories and logs under `05_optional/phabox/`, then summarizes those artifacts in `optional_tool_summary.tsv` and `optional_tool_metrics.tsv`.
+Supported `--phabox_task` values are `end_to_end`, `phamer`, `phagcn`, `phatyp`, `cherry`, `phavip`, `contamination`, `votu`, and `tree`. PhaBOX2 also requires runtime helper tools such as `prodigal-gv` and `diamond` on `PATH`; `bin/phageflow db prepare --tools phabox` rebuilds the downloaded PhaBOX2 DIAMOND indexes with the local DIAMOND version. The wrapper writes per-sample directories and logs under `05_optional/phabox/`, then summarizes those artifacts in `optional_tool_summary.tsv` and `optional_tool_metrics.tsv`.
 
 To include already completed PhaBOX/PhaBOX2 outputs in the conservative optional summary layer, pass the output directory explicitly:
 

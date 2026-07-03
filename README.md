@@ -29,6 +29,7 @@ This workflow only processes existing sequence files and metadata. It does not p
 
 For a beginner-friendly copy-paste walkthrough, see [`docs/quickstart.md`](docs/quickstart.md).
 For optional publication modules and strict optional-output validation, see [`docs/optional_modules.md`](docs/optional_modules.md).
+For managed heavy database setup, see [`docs/database_management.md`](docs/database_management.md).
 
 For future AI-agent or maintainer handoff guidance, see [`AGENTS.md`](AGENTS.md).
 
@@ -53,7 +54,7 @@ bash bin/phageflow install --with publication
 bash bin/phageflow doctor --with publication
 ```
 
-Optional install groups are `lite`, `publication`, `structure`, `phylogeny`, `host`, `host-prediction`, `integrated`, and `all`. These install executables only; large databases such as CheckV, Pharokka, geNomad, Phold, iPHoP, and PhaBOX2 databases still need to be provided separately with the relevant workflow parameters.
+Optional install groups are `lite`, `publication`, `structure`, `phylogeny`, `host`, `host-prediction`, `integrated`, and `all`. These install executables only. Large databases can be prepared under a user-chosen root with `bash bin/phageflow db prepare --db-root /path/to/phageflow-db --tools all`, then passed to Nextflow with the generated local path arguments.
 
 Run a real phage genome with automatic tool detection/installation:
 
@@ -72,6 +73,17 @@ Check the active environment/tools:
 ```bash
 bash bin/phageflow doctor
 ```
+
+Prepare heavy optional databases outside the repository and generate matching Nextflow flags:
+
+```bash
+export PHAGEFLOW_DB_ROOT=/mnt/storage/db/phageflow
+bash bin/phageflow db status
+bash bin/phageflow db prepare --tools publication,structure,host-prediction,integrated --threads 16 --dry-run
+bash bin/phageflow db run-args --tools all --shell
+```
+
+Remove `--dry-run` only when you are ready for large downloads. Existing populated databases are skipped by default; use `bash bin/phageflow db update ...` to fetch fresh copies.
 
 Summarize or package a completed run without rerunning the workflow:
 
@@ -250,6 +262,7 @@ nextflow run main.nf \
   --run_genomad true \
   --genomad_db /path/to/genomad_db \
   --run_phold true \
+  --phold_db /path/to/phold_db \
   --run_clinker true \
   --pharokka_db /path/to/pharokka_db \
   --outdir results/phage_publication_enriched
@@ -287,7 +300,7 @@ PhaBOX2 outputs are summarized as optional artifacts and metric counts only. Tax
 Combined heavy optional validation template:
 
 ```bash
-bash bin/phageflow install --with publication,host-prediction,integrated
+bash bin/phageflow install --with publication,structure,host-prediction,integrated
 nextflow run main.nf \
   --input phage_samplesheet.tsv \
   --run_trnascan true \
@@ -299,6 +312,8 @@ nextflow run main.nf \
   --pharokka_db /path/to/pharokka_db \
   --run_genomad true \
   --genomad_db /path/to/genomad_db \
+  --run_phold true \
+  --phold_db /path/to/phold_db \
   --run_clinker true \
   --run_iphop true \
   --iphop_db /path/to/iphop_db \
@@ -310,6 +325,7 @@ bash bin/phageflow validate \
   --outdir results/phage_heavy_optional \
   --require-pangenome-rows \
   --expect-publication-optionals \
+  --expect-phold \
   --expect-iphop \
   --expect-phabox
 ```
@@ -357,6 +373,7 @@ Outputs are written under `--outdir`:
 - `99_report/index.html`: HTML dashboard.
 - `99_report/figures/`: 400-dpi PNG/TIFF figures plus PDF/SVG vector exports for publication editing.
 - `99_report/tables/`: key downloadable TSV files.
+- `99_report/tables/figure_manifest.tsv`: publication figure inventory with format, size, and SHA256 checksum for each figure export.
 - `99_report/tables/claim_evidence_matrix.tsv`: software claim-to-artifact evidence matrix with limitations.
 - `99_report/tables/marker_provenance.tsv`: marker alignment/tree provenance table when marker-tree outputs are enabled.
 - `99_report/tables/optional_tool_summary.tsv`: optional tRNAscan-SE/BACPHLIP/ABRicate/CheckV/Pharokka/geNomad/Phold/clinker/iPHoP/PhaBOX artifact status, table shapes, sizes, and checksums.
