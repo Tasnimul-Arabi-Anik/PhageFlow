@@ -49,6 +49,7 @@ Release validation outcomes:
 - Default PhaBOX2 behavior check: disabled optional module reports `not_run`.
 - Missing PhaBOX2 database check: `--run_phabox true` exits with a clear `--phabox_db` requirement.
 - GitHub CI: passed for baseline v0.4 PhaBOX2 wrapper commit `4efb1bd`; GitHub static CI remains the required remote gate before tagging.
+- GitHub Actions includes a manual `Nextflow smoke` workflow for maintainers to run a bundled Nextflow smoke test on demand. This manual workflow is optional and should not be treated as a required PR gate until runtime reliability is separately recorded.
 
 Historical `v0.1.0-validated` focused audit:
 
