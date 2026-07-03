@@ -406,6 +406,8 @@ Run the complete local validation suite:
 bash bin/run_local_validation.sh
 ```
 
+GitHub also includes a manual `Nextflow smoke` workflow for maintainers who want to run a tiny bundled Nextflow smoke test in Actions. It is triggered with `workflow_dispatch` and is intentionally not required for every pull request until runtime reliability is proven.
+
 Or validate an existing run:
 
 ```bash

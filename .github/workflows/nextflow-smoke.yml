@@ -1,0 +1,65 @@
+name: Nextflow smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  nextflow-smoke:
+    name: Nextflow smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash -el {0}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up PhageFlow conda environment
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: envs/phageflow-core.yml
+          environment-name: phageflow-core
+          cache-environment: true
+          cache-downloads: true
+          init-shell: bash
+
+      - name: Show tool versions
+        run: |
+          java -version
+          nextflow -version
+          python3 --version
+          mmseqs version
+          blastn -version
+
+      - name: Run bundled Nextflow smoke test
+        run: |
+          nextflow run main.nf \
+            -profile test \
+            --pangenome_method mmseqs \
+            --outdir nextflow_smoke_results
+
+          python3 bin/validate_phageflow_run.py \
+            --outdir nextflow_smoke_results \
+            --require-pangenome-rows \
+            --expect-reference-context
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextflow-smoke-logs
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            .nextflow.log
+            work/**/.command.log
+            work/**/.command.err
+            nextflow_smoke_results/99_report/phageflow_validation_report.tsv
