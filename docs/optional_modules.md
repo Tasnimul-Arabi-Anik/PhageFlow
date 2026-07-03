@@ -56,6 +56,8 @@ bash bin/phageflow db run-args --tools all --shell
 
 See [`database_management.md`](database_management.md) for the full local and `dulab` remote workflow.
 
+For database-backed validation commands, expected output directories, validator flags, and provenance fields, see [`heavy_optional_validation_runbook.md`](heavy_optional_validation_runbook.md).
+
 ## Doctor Checks
 
 ```bash
