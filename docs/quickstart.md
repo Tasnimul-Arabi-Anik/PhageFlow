@@ -324,6 +324,8 @@ The report figures are saved as PNG, TIFF, PDF, and SVG, with sizes and SHA256 c
 
 ## 9. Troubleshooting
 
+For a fuller setup, optional-tool, database, container, and validation troubleshooting guide, see [`troubleshooting.md`](troubleshooting.md).
+
 If `conda`, `mamba`, or `micromamba` is missing, install Miniconda or Mambaforge and rerun:
 
 ```bash
