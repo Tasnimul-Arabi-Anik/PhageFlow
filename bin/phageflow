@@ -25,6 +25,7 @@ Usage:
   bin/phageflow functional-summary --root PATH [--output functional_category_summary.tsv]
   bin/phageflow network-summary --vcontact-dir PATH [--output network_context_summary.tsv] [--import-to-report RUN]
   bin/phageflow structural-summary --outdir PATH [--output structural_summary.tsv]
+  bin/phageflow db status|prepare|update|run-args|heavy-command [database args]
   bin/phageflow pangenome-sensitivity --left RUN_A --right RUN_B [--output comparison.tsv] [--import-to-report RUN_A]
   bin/phageflow package --outdir PATH [--output package.tar.gz] [--include-logs]
   bin/phageflow container-smoke
@@ -51,6 +52,9 @@ Examples:
   bash bin/phageflow functional-summary --root results/my_phage --output results/my_phage_functional_category_summary.tsv
   bash bin/phageflow network-summary --vcontact-dir results/vcontact2 --output results/network_context_summary.tsv --import-to-report results/my_phage
   bash bin/phageflow structural-summary --outdir results/my_phage --output results/my_phage_structural_summary.tsv
+  bash bin/phageflow db status --db-root /mnt/storage/db/phageflow
+  bash bin/phageflow db prepare --db-root /mnt/storage/db/phageflow --tools publication,host-prediction,integrated --dry-run
+  bash bin/phageflow db run-args --db-root /mnt/storage/db/phageflow --tools all --shell
   bash bin/phageflow pangenome-sensitivity --left results/mmseqs_run --right results/rbh_run --output pangenome_sensitivity.tsv --import-to-report results/mmseqs_run
   bash bin/phageflow package --outdir results/my_phage --output my_phage_phageflow_package.tar.gz
   bash bin/phageflow container-smoke
@@ -63,8 +67,8 @@ Examples:
 Behavior:
   If required tools are missing, the launcher creates a removable conda environment at
   .phageflow-env by default, or at PHAGEFLOW_ENV_PREFIX / --env-prefix.
-  Optional groups install executables only; large databases such as CheckV, Pharokka,
-  geNomad, Phold, iPHoP, and PhaBOX2 databases still need to be downloaded/provided separately.
+  Optional groups install executables only. Use `bin/phageflow db prepare` to
+  explicitly download large optional databases under a user-chosen database root.
 EOF
 }
 
@@ -452,6 +456,12 @@ case "${cmd}" in
     ;;
   structural-summary)
     python3 "${PHAGEFLOW_DIR}/bin/structural_summary.py" "$@"
+    ;;
+  db)
+    if [[ -d "${ENV_PREFIX}/bin" ]]; then
+      export PATH="${ENV_PREFIX}/bin:${PATH}"
+    fi
+    python3 "${PHAGEFLOW_DIR}/bin/phageflow_db.py" "$@"
     ;;
   pangenome-sensitivity)
     python3 "${PHAGEFLOW_DIR}/bin/pangenome_sensitivity.py" "$@"

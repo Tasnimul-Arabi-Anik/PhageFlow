@@ -45,6 +45,7 @@ REQUIRED_TABLES = [
     "optional_tool_summary.tsv",
     "optional_tool_metrics.tsv",
     "functional_category_summary.tsv",
+    "figure_manifest.tsv",
 ]
 
 OPTIONAL_GROUPS = {
@@ -286,7 +287,7 @@ def check_optional_module(
         directory = optional_dir / "pharokka"
         ok &= check_glob_count(results, "optional_output:pharokka_dirs", directory, "*.pharokka", sample_count)
         ok &= check_glob_count(results, "optional_output:pharokka_genbank", directory, "*.pharokka/**/*.gb*", sample_count)
-        ok &= check_glob_count(results, "optional_output:pharokka_gff", directory, "*.pharokka/**/*.gff*", sample_count)
+        ok &= check_glob_count(results, "optional_output:pharokka_gff", directory, "*.pharokka/pharokka.gff", sample_count)
     elif module == "genomad":
         directory = optional_dir / "genomad"
         ok &= check_glob_count(results, "optional_output:genomad_dirs", directory, "*.genomad", sample_count)
@@ -350,7 +351,7 @@ def check_optional_metric_module(
     rows = read_rows(path)
     expected = 1 if module == "clinker" else sample_count
     matching = [row for row in rows if row.get("tool") == module]
-    available = [row for row in matching if row.get("status") == "available"]
+    available = [row for row in matching if row.get("status", "").startswith("available")]
     ok = len(matching) >= expected and len(available) >= expected
     results.append(
         {
@@ -491,10 +492,14 @@ def main() -> int:
 
     figure_pngs = sorted(figures_dir.glob("*.png")) if figures_dir.exists() else []
     figure_tiffs = sorted(figures_dir.glob("*.tiff")) if figures_dir.exists() else []
+    figure_files = sorted(path for path in figures_dir.glob("*") if path.suffix.lower() in {".png", ".tiff", ".pdf", ".svg"}) if figures_dir.exists() else []
     ok &= len(figure_pngs) >= args.min_figures
     results.append({"check": "figure_png_count", "path": str(figures_dir), "observed_count": str(len(figure_pngs)), "minimum_count": str(args.min_figures), "status": "PASS" if len(figure_pngs) >= args.min_figures else "FAIL"})
     ok &= len(figure_tiffs) >= args.min_figures
     results.append({"check": "figure_tiff_count", "path": str(figures_dir), "observed_count": str(len(figure_tiffs)), "minimum_count": str(args.min_figures), "status": "PASS" if len(figure_tiffs) >= args.min_figures else "FAIL"})
+    manifest_rows = row_count(tables_dir / "figure_manifest.tsv")
+    ok &= manifest_rows >= len(figure_files)
+    results.append({"check": "figure_manifest_rows", "path": str(tables_dir / "figure_manifest.tsv"), "observed_count": str(manifest_rows), "minimum_count": str(len(figure_files)), "status": "PASS" if manifest_rows >= len(figure_files) else "FAIL"})
 
     manifest_path = report_dir / "validation_manifest.json"
     if manifest_path.exists():

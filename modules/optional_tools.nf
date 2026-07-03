@@ -142,17 +142,37 @@ process PHOLD {
         echo "ERROR: phold not found. Install it with conda/mamba or pass --phold_bin /path/to/phold." >&2
         exit 127
     fi
-    GBK_FILE=\$(find "${pharokka_dir}" -type f \\( -name '*.gbk' -o -name '*.gb' \\) | sort | head -n 1)
+    PHOLD_DB="${params.phold_db}"
+    PHOLD_DB_ARGS=()
+    if [ -n "\${PHOLD_DB}" ] && [ "\${PHOLD_DB}" != "null" ]; then
+        PHOLD_DB_ARGS=(-d "\${PHOLD_DB}")
+    fi
+    GBK_FILE=\$(find -L "${pharokka_dir}" -type f \\( -name '*.gbk' -o -name '*.gb' \\) | sort | head -n 1)
     if [ -z "\${GBK_FILE}" ]; then
         echo "ERROR: no GenBank file found in Pharokka output: ${pharokka_dir}" >&2
         exit 1
     fi
+    set +e
     "\${PHOLD_BIN}" run \
         -i "\${GBK_FILE}" \
         -o "${sample_id}.phold" \
         -t ${task.cpus} \
+        "\${PHOLD_DB_ARGS[@]}" \
         ${params.phold_extra_args} \
         > "${sample_id}.phold.log" 2>&1
+    PHOLD_STATUS=\$?
+    set -e
+    if [ "\${PHOLD_STATUS}" -ne 0 ]; then
+        if grep -qi "Foldseek found no hits" "${sample_id}.phold.log"; then
+            mkdir -p "${sample_id}.phold"
+            cat > "${sample_id}.phold/phold_no_hits_note.txt" <<EOF
+Phold completed database validation and Foldseek execution, but no structural hits were reported for this input.
+The optional Phold artifact is retained as a no-hit result rather than failing the whole workflow.
+EOF
+            exit 0
+        fi
+        exit "\${PHOLD_STATUS}"
+    fi
     """
 }
 
@@ -173,7 +193,7 @@ process CLINKER_SYNTENY {
     script:
     """
     set -euo pipefail
-    find . -type f \\( -name '*.gbk' -o -name '*.gb' \\) | sort > gbk_files.txt
+    find -L . -type f \\( -name '*.gbk' -o -name '*.gb' \\) | sort > gbk_files.txt
     GBK_COUNT=\$(wc -l < gbk_files.txt | tr -d ' ')
     if [ "\${GBK_COUNT}" -lt "${params.clinker_min_genomes}" ]; then
         cat > clinker_synteny_note.md <<EOF
@@ -232,6 +252,7 @@ process IPHOP {
         echo "ERROR: iPHoP not found. Install it with conda/mamba or pass --iphop_bin /path/to/iphop." >&2
         exit 127
     fi
+    set +e
     "\${IPHOP_BIN}" predict \
         --fa_file "${fasta}" \
         --db_dir "${params.iphop_db}" \
@@ -240,6 +261,19 @@ process IPHOP {
         --min_score ${params.iphop_min_score} \
         ${params.iphop_extra_args} \
         > "${sample_id}.iphop.log" 2>&1
+    IPHOP_STATUS=\$?
+    set -e
+    if [ "\${IPHOP_STATUS}" -ne 0 ]; then
+        if grep -q "php_db_Prediction_Allhost.csv" "${sample_id}.iphop.log" && grep -q "FileNotFoundError" "${sample_id}.iphop.log"; then
+            mkdir -p "${sample_id}.iphop"
+            cat > "${sample_id}.iphop/iphop_no_predictions_note.txt" <<EOF
+iPHoP completed database validation and several prediction stages, but no PHP prediction CSV was produced for this input.
+The optional iPHoP artifact is retained as a no-prediction result rather than failing the whole workflow.
+EOF
+            exit 0
+        fi
+        exit "\${IPHOP_STATUS}"
+    fi
     """
 }
 

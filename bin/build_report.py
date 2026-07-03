@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import html
 import json
 import platform
@@ -88,6 +89,36 @@ def save_figure(fig, figures_dir: Path, stem: str) -> list[str]:
         outputs.append(str(path))
     plt.close(fig)
     return outputs
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def figure_manifest_rows(figure_paths: list[str], report_dir: Path) -> list[dict[str, str]]:
+    rows = []
+    report_root = report_dir.resolve()
+    for index, raw_path in enumerate(sorted(figure_paths, key=lambda item: (Path(item).stem, Path(item).suffix)), start=1):
+        path = Path(raw_path)
+        try:
+            relative_path = path.resolve().relative_to(report_root)
+        except ValueError:
+            relative_path = path.name
+        rows.append(
+            {
+                "figure_id": f"FIG_{index:03d}",
+                "stem": path.stem,
+                "extension": path.suffix.lstrip(".").lower(),
+                "relative_path": str(relative_path),
+                "bytes": str(path.stat().st_size),
+                "sha256": sha256_file(path),
+            }
+        )
+    return rows
 
 
 def plot_genome_qc(fasta_rows: list[dict[str, str]], figures_dir: Path) -> list[str]:
@@ -949,6 +980,8 @@ def main() -> int:
     figure_paths.extend(plot_pangenome(presence_rows, metadata_rows, args.figures_dir))
     figure_paths.extend(plot_host_context(host_rows, args.figures_dir))
     figure_paths.extend(plot_host_adaptation(host_adaptation_rows, args.figures_dir))
+    figure_manifest = figure_manifest_rows(figure_paths, args.figures_dir.parent)
+    write_rows(tables_dir / "figure_manifest.tsv", figure_manifest)
 
     params = {
         "pangenome_method": args.pangenome_method,
@@ -999,6 +1032,7 @@ def main() -> int:
         ("qa", "software_versions.tsv", "Detected software and runtime versions"),
         ("qa", "params.json", "Workflow parameters captured by the report builder"),
         ("qa", "runtime_summary.tsv", "Report runtime and output counts"),
+        ("qa", "tables/figure_manifest.tsv", "Publication figure inventory with sizes and checksums"),
         ("table", "tables/fasta_stats_combined.tsv", "Combined genome QC table"),
         ("table", "tables/codon_summary_combined.tsv", "Combined codon usage summary"),
         ("table", "tables/cohort_pairwise_similarity.tsv", "Pairwise cohort similarity matrix source"),
@@ -1036,6 +1070,7 @@ def main() -> int:
     validation_checks = {
         "html_report_exists": True,
         "figures_generated": len(figure_paths) > 0,
+        "figure_manifest_rows": len(figure_manifest),
         "important_files_count": len(important_files),
         "fasta_rows": len(fasta_rows),
         "orf_rows": len(orf_rows),
@@ -1076,6 +1111,7 @@ def main() -> int:
     runtime = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "figures_generated": str(len(figure_paths)),
+        "figure_manifest_rows": str(len(figure_manifest)),
         "important_files": str(len(important_files)),
         "genomes": validation.get("genomes", str(len(fasta_rows))),
         "pangenome_method": args.pangenome_method,

@@ -34,7 +34,9 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     pharokka = tmp_path / "sample_a.pharokka"
     genomad = tmp_path / "sample_a.genomad"
     phold = tmp_path / "sample_a.phold"
+    phold_no_hit = tmp_path / "sample_b.phold"
     iphop = tmp_path / "sample_a.iphop"
+    iphop_no_prediction = tmp_path / "sample_b.iphop"
     phabox = tmp_path / "sample_a.phabox"
     clinker = tmp_path / "clinker_synteny.html"
     gbk_files = tmp_path / "gbk_files.txt"
@@ -46,7 +48,9 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     write(pharokka / "sample_a_cds_functions.tsv", "gene\tfunction\tphrog_category\nx\ty\tDNA metabolism\nz\tq\tDNA metabolism\n")
     write(genomad / "sample_a_summary.tsv", "seq_name\tlength\ncontig1\t1000\n")
     write(phold / "sample_a_confidence.tsv", "cds\tconfidence\ncds1\t0.9\n")
+    write(phold_no_hit / "phold_no_hits_note.txt", "No structural hits were reported for this input.\n")
     write(iphop / "Host_prediction_to_genus_m90.csv", "Virus,Host genus,Score\ncontig1,host_a,95\n")
+    write(iphop_no_prediction / "iphop_no_predictions_note.txt", "No host prediction table was produced for this input.\n")
     write(phabox / "phabox_prediction.tsv", "contig\ttaxonomy\thost\tlifestyle\tscore\ncontig1\tfamily_a\thost_a\ttemperate\t0.91\n")
     write(clinker, "<html><body>ok</body></html>\n")
     write(gbk_files, "sample_a.gbk\nsample_b.gbk\n")
@@ -74,8 +78,12 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
         str(genomad),
         "--phold-artifact",
         str(phold),
+        "--phold-artifact",
+        str(phold_no_hit),
         "--iphop-artifact",
         str(iphop),
+        "--iphop-artifact",
+        str(iphop_no_prediction),
         "--phabox-artifact",
         str(phabox),
         "--clinker-artifact",
@@ -101,7 +109,8 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
 
     for tool in ["trnascan", "bacphlip", "abricate", "checkv", "pharokka", "genomad", "phold", "iphop", "phabox"]:
         assert by_tool_sample[(tool, "sample_a")]["status"] == "available"
-        assert by_tool_sample[(tool, "sample_b")]["status"] == "not_run"
+        expected_b = "available" if tool in {"phold", "iphop"} else "not_run"
+        assert by_tool_sample[(tool, "sample_b")]["status"] == expected_b
 
     assert by_tool_sample[("trnascan", "sample_a")]["primary_artifact_type"] == "trna_table"
     assert by_tool_sample[("abricate", "sample_a")]["primary_artifact_type"] == "screen_table"
@@ -121,8 +130,8 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
         "phold",
         "trnascan",
     ]
-    assert summary["status_counts"]["available"] == 10
-    assert summary["status_counts"]["not_run"] == 9
+    assert summary["status_counts"]["available"] == 12
+    assert summary["status_counts"]["not_run"] == 7
 
     subprocess.run(
         [
@@ -142,7 +151,10 @@ def run_optional_tool_summary_regression(tmp_path: Path) -> None:
     assert metric_index[("pharokka", "sample_a", "annotation_records")]["value"] == "2"
     assert metric_index[("genomad", "sample_a", "classification_records")]["value"] == "1"
     assert metric_index[("phold", "sample_a", "structural_annotation_records")]["value"] == "1"
+    assert metric_index[("phold", "sample_b", "structural_annotation_records")]["status"].startswith("available")
     assert metric_index[("iphop", "sample_a", "host_prediction_records")]["value"] == "1"
+    assert metric_index[("iphop", "sample_b", "host_prediction_records")]["status"].startswith("available")
+    assert metric_index[("iphop", "sample_b", "host_prediction_records")]["value"] == "0"
     assert metric_index[("phabox", "sample_a", "phabox_records")]["value"] == "1"
     assert metric_index[("clinker", "COHORT", "genbank_inputs_listed")]["value"] == "2"
     metrics_summary = json.loads(metrics_json.read_text())

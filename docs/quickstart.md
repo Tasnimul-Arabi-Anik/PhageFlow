@@ -26,7 +26,17 @@ bash bin/phageflow install --with publication
 bash bin/phageflow doctor --with publication
 ```
 
-Use `--with lite` for tRNAscan-SE/BACPHLIP/ABRicate, `--with structure` for Phold, `--with phylogeny` for MAFFT/IQ-TREE/trimAl, or `--with all` for every optional group. These commands install executables only; large databases still need to be supplied through the workflow parameters.
+Use `--with lite` for tRNAscan-SE/BACPHLIP/ABRicate, `--with structure` for Phold, `--with phylogeny` for MAFFT/IQ-TREE/trimAl, or `--with all` for every optional group. These commands install executables only; large databases still need to be prepared outside the repository and supplied through workflow parameters.
+
+For heavy optional modules, prepare databases explicitly:
+
+```bash
+export PHAGEFLOW_DB_ROOT=/mnt/storage/db/phageflow
+bash bin/phageflow db prepare --tools publication,structure,host-prediction,integrated --threads 16 --dry-run
+bash bin/phageflow db run-args --tools all --shell
+```
+
+See [`database_management.md`](database_management.md) before removing `--dry-run`.
 
 What this does:
 
@@ -293,10 +303,11 @@ Start with these files:
 <outdir>/99_report/tables/marker_topology_consistency.tsv
 <outdir>/99_report/tables/pangenome_summary.tsv
 <outdir>/99_report/tables/host_context.tsv
+<outdir>/99_report/tables/figure_manifest.tsv
 <outdir>/99_report/tables/claim_evidence_matrix.tsv
 ```
 
-The report figures are saved as PNG, TIFF, PDF, and SVG:
+The report figures are saved as PNG, TIFF, PDF, and SVG, with sizes and SHA256 checksums recorded in `99_report/tables/figure_manifest.tsv`:
 
 ```text
 <outdir>/99_report/figures/

@@ -27,6 +27,7 @@ jobs:
           python3 tests/test_optional_tool_summary.py
           python3 tests/test_lightweight_metrics.py
           python3 tests/test_validator_optionals.py
+          python3 tests/test_phageflow_db.py
           python3 tests/test_pangenome_sensitivity.py
           python3 tests/test_network_context_summary.py
 

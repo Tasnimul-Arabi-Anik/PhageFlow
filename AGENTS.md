@@ -24,6 +24,7 @@ This repository is a validated software pipeline for lightweight single-genome a
 
 - Do not make heavy tools or large databases part of the default run.
 - Do not add public-network database discovery to the default workflow.
+- Keep database downloads behind explicit `bin/phageflow db prepare` or `bin/phageflow db update` commands, never as hidden workflow-time behavior.
 - Do not print raw annotation values, taxonomy labels, host-prediction values, feature names, table cell contents, or sensitive sequence strings in summary utilities.
 - Do not claim host range, infectivity, wet-lab outcome, manuscript-grade biological conclusions, or domain interpretation.
 - Keep every external database as an explicit local path parameter.
@@ -36,6 +37,7 @@ Use the scope gate in `docs/release_checklist.md` before coding:
 
 - Default: small, local, no large database, bundled validation data available.
 - Heavy optional wrapper: disabled by default, explicit executable/database params, output under `05_optional/<tool>/`, software versions captured, validator can require expected outputs, docs describe limitations.
+- Heavy database manager: explicit user-chosen DB root, skip existing populated DBs by default, update only when requested, manifest provenance written under the DB root, no repository-tracked database files.
 - Import-only summary: accepts completed outputs, reports only counts/shapes/checksums/broad categories, integrates with `summarize` and `package`.
 - Deferred: raw reads, metagenomic discovery, public taxonomy assignment, unstable CLI/database contracts, or features needing a separate validation dataset.
 

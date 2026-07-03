@@ -173,7 +173,19 @@ def preferred_genomad_artifact(path: Path, log_path: Path | None = None) -> Path
 
 
 def preferred_phold_artifact(path: Path, log_path: Path | None = None) -> Path | None:
-    patterns = ["**/*confidence*.tsv", "**/*per_cds*.tsv", "**/*all_cds*.tsv", "**/*.tsv", "**/*.gbk", "**/*.gff", "**/*.log"]
+    patterns = [
+        "**/*confidence*.tsv",
+        "**/*per_cds*.tsv",
+        "**/*all_cds*.tsv",
+        "**/*probabilities*.csv",
+        "**/*no_hits_note*.txt",
+        "**/*.tsv",
+        "**/*.csv",
+        "**/*.gbk",
+        "**/*.gff",
+        "**/*.txt",
+        "**/*.log",
+    ]
     return first_file(path, patterns) or log_path
 
 
@@ -181,8 +193,10 @@ def preferred_iphop_artifact(path: Path, log_path: Path | None = None) -> Path |
     patterns = [
         "**/*Host_prediction*.csv",
         "**/*host*prediction*.csv",
+        "**/*no_predictions_note*.txt",
         "**/*host*.csv",
         "**/*host*.tsv",
+        "**/*.txt",
         "**/*.csv",
         "**/*.tsv",
         "**/*.log",
