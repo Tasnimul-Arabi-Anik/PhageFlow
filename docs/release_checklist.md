@@ -19,6 +19,7 @@ Use this checklist before tagging a PhageFlow release.
 - [ ] Full local validation suite passes.
 - [ ] Container smoke test passes when Docker is available.
 - [ ] Package export works from a completed run.
+- [ ] Public example-data provenance is recorded before any real-data validation release, including source, accession or record ID, retrieval date, input checksum, command log, database versions when used, and interpretation boundary.
 
 ## Scope Boundaries
 
