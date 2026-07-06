@@ -53,27 +53,34 @@ cd "$PHAGEFLOW_ROOT/PhageFlow"
 bash bin/phageflow doctor
 ```
 
-Several database-backed heavy tools are installed in separate tool environments. For heavy optional runs, prepend their `bin` directories:
+Optional tools are installed or linked in separate tool environments. For heavy optional runs, prepend their `bin` directories:
 
 ```bash
 export PHAGEFLOW_ROOT="$HOME/Work/Bioinformatics/phagegenomics"
 export PHAGEFLOW_ENV_PREFIX="$PHAGEFLOW_ROOT/phageflow-env"
-export PATH="$PHAGEFLOW_ENV_PREFIX/bin:$PHAGEFLOW_ROOT/tool-envs/checkv/bin:$PHAGEFLOW_ROOT/tool-envs/pharokka/bin:$PHAGEFLOW_ROOT/tool-envs/genomad/bin:$PHAGEFLOW_ROOT/tool-envs/phold/bin:$PHAGEFLOW_ROOT/tool-envs/iphop/bin:$PHAGEFLOW_ROOT/tool-envs/phabox2/bin:$PHAGEFLOW_ROOT/tool-envs/phabox/bin:$PATH"
+export PATH="$PHAGEFLOW_ROOT/tool-envs/wrappers/bin:$PHAGEFLOW_ENV_PREFIX/bin:$PHAGEFLOW_ROOT/tool-envs/bacphlip/bin:$PHAGEFLOW_ROOT/tool-envs/checkv/bin:$PHAGEFLOW_ROOT/tool-envs/pharokka/bin:$PHAGEFLOW_ROOT/tool-envs/genomad/bin:$PHAGEFLOW_ROOT/tool-envs/phold/bin:$PHAGEFLOW_ROOT/tool-envs/clinker/bin:$PHAGEFLOW_ROOT/tool-envs/iphop/bin:$PHAGEFLOW_ROOT/tool-envs/phabox2/bin:$PHAGEFLOW_ROOT/tool-envs/phabox/bin:$PHAGEFLOW_ROOT/tool-envs/phylogeny/bin:$PATH"
 ```
 
-Verified heavy tool locations include:
+Verified optional tool locations include:
 
 ```text
+tool-envs/wrappers/bin/abricate
+tool-envs/bacphlip/bin/bacphlip
 tool-envs/checkv/bin/checkv
 tool-envs/pharokka/bin/pharokka.py
 tool-envs/pharokka/bin/tRNAscan-SE
 tool-envs/genomad/bin/genomad
 tool-envs/phold/bin/phold
+tool-envs/clinker/bin/clinker
 tool-envs/iphop/bin/iphop
 tool-envs/phabox2/bin/phabox2
+tool-envs/phylogeny/bin/iqtree2
+tool-envs/phylogeny/bin/trimal
 ```
 
-At setup time, `bacphlip`, `abricate`, `clinker`, `iqtree2`, and `trimal` were not available in the checked tool paths. Do not force a single `bash bin/phageflow install --with all` solve if it stalls. Prefer staged installs or dedicated tool envs when those optional tools are needed.
+`tool-envs/abricate` is a symlink to an existing ABRicate conda environment. The wrapper in `tool-envs/wrappers/bin/abricate` ensures ABRicate uses that environment's Perl modules even when the PhageFlow core environment appears earlier in `PATH`. `tool-envs/phylogeny/bin/iqtree2` is a compatibility symlink to the IQ-TREE executable installed by the conda package.
+
+Do not force a single `bash bin/phageflow install --with all` solve if it stalls. Prefer reusing existing neighboring environments or installing missing tools into dedicated `tool-envs/<tool>/` environments.
 
 ## Shared Database Policy
 
@@ -157,7 +164,7 @@ Use a dedicated output directory for each heavy run:
 export PHAGEFLOW_ROOT="$HOME/Work/Bioinformatics/phagegenomics"
 export PHAGEFLOW_ENV_PREFIX="$PHAGEFLOW_ROOT/phageflow-env"
 export PHAGEFLOW_DB_ROOT=/mnt/storage/db
-export PATH="$PHAGEFLOW_ENV_PREFIX/bin:$PHAGEFLOW_ROOT/tool-envs/checkv/bin:$PHAGEFLOW_ROOT/tool-envs/pharokka/bin:$PHAGEFLOW_ROOT/tool-envs/genomad/bin:$PHAGEFLOW_ROOT/tool-envs/phold/bin:$PHAGEFLOW_ROOT/tool-envs/iphop/bin:$PHAGEFLOW_ROOT/tool-envs/phabox2/bin:$PHAGEFLOW_ROOT/tool-envs/phabox/bin:$PATH"
+export PATH="$PHAGEFLOW_ROOT/tool-envs/wrappers/bin:$PHAGEFLOW_ENV_PREFIX/bin:$PHAGEFLOW_ROOT/tool-envs/bacphlip/bin:$PHAGEFLOW_ROOT/tool-envs/checkv/bin:$PHAGEFLOW_ROOT/tool-envs/pharokka/bin:$PHAGEFLOW_ROOT/tool-envs/genomad/bin:$PHAGEFLOW_ROOT/tool-envs/phold/bin:$PHAGEFLOW_ROOT/tool-envs/clinker/bin:$PHAGEFLOW_ROOT/tool-envs/iphop/bin:$PHAGEFLOW_ROOT/tool-envs/phabox2/bin:$PHAGEFLOW_ROOT/tool-envs/phabox/bin:$PHAGEFLOW_ROOT/tool-envs/phylogeny/bin:$PATH"
 cd "$PHAGEFLOW_ROOT/PhageFlow"
 
 DB_ARGS="$(bash bin/phageflow db run-args --db-root "$PHAGEFLOW_DB_ROOT" --tools all --shell)"
