@@ -7,6 +7,7 @@ This repository is a validated software pipeline for lightweight single-genome a
 - `README.md`: user-facing install, run, output, and validation commands.
 - `docs/analysis_capability_matrix.md`: what is default, heavy optional, import-only, or deferred.
 - `docs/optional_modules.md`: optional tool install/run/validate contracts.
+- `docs/dulab_remote_runbook.md`: canonical `dulab` workspace, shared `/mnt/storage/db` policy, and remote run commands.
 - `docs/release_checklist.md`: release and analysis-scope gate.
 - `docs/v0.4_progress.md`: recent expansion status and remaining deferred work.
 - `docs/validation_status.md`: validation claims and explicit boundaries.
@@ -71,7 +72,7 @@ Run the full local workflow validation after changes to Nextflow wiring, report 
 bash bin/run_local_validation.sh
 ```
 
-For larger validations, use the configured remote host `dulab` with a temporary directory, copy only needed files, and remove the directory after validation.
+For larger validations, use the configured remote host `dulab` according to `docs/dulab_remote_runbook.md`. Reuse `/mnt/storage/db`, check database status before downloads, and keep one canonical active checkout under `$HOME/Work/Bioinformatics/phagegenomics/PhageFlow`.
 
 ## Current Deferred Work
 

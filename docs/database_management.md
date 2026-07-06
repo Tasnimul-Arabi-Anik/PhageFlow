@@ -92,6 +92,8 @@ The generated command enables the relevant `--run_*` flags and passes the manage
 
 For the `dulab` workstation, use the dedicated storage mount for databases and a separate project workspace:
 
+For the current canonical checkout, backup policy, tool-env PATH pattern, and verified shared database state, see [`dulab_remote_runbook.md`](dulab_remote_runbook.md).
+
 ```bash
 ssh dulab 'mkdir -p /mnt/storage/db "$HOME/Work/Bioinformatics/phagegenomics"'
 
