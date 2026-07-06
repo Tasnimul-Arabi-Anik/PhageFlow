@@ -35,6 +35,7 @@ For the maintained `dulab` remote setup and shared `/mnt/storage/db` policy, see
 For report table purposes, column groups, and interpretation boundaries, see [`docs/output_schema.md`](docs/output_schema.md).
 For setup, optional-tool, database, container, and validation troubleshooting, see [`docs/troubleshooting.md`](docs/troubleshooting.md).
 For the future public real-data validation plan, see [`docs/v0.5_real_data_validation_plan.md`](docs/v0.5_real_data_validation_plan.md).
+For the completed public real-data software-validation pilot, see [`docs/v0.5_public_validation_evidence.md`](docs/v0.5_public_validation_evidence.md).
 For honest positioning against external tools and benchmarking guidance, see [`docs/comparison_and_benchmarking.md`](docs/comparison_and_benchmarking.md).
 
 For future AI-agent or maintainer handoff guidance, see [`AGENTS.md`](AGENTS.md).

@@ -51,6 +51,14 @@ Release validation outcomes:
 - GitHub CI: passed for baseline v0.4 PhaBOX2 wrapper commit `4efb1bd`; GitHub static CI remains the required remote gate before tagging.
 - GitHub Actions includes a manual `Nextflow smoke` workflow for maintainers to run a bundled Nextflow smoke test on demand. This manual workflow is optional and should not be treated as a required PR gate until runtime reliability is separately recorded.
 
+Post-`v0.4.0` public-data software-validation pilot:
+
+- Public NCBI Nucleotide single-genome and small-cohort examples were run on the maintained `dulab` setup.
+- Both public example runs completed and passed the validator for their expected workflow contracts.
+- Completed-run summarize and package utilities were exercised on both outputs.
+- Provenance, command logs, package checksums, and conservative interpretation boundaries are recorded in [`v0.5_public_validation_evidence.md`](v0.5_public_validation_evidence.md).
+- This pilot supports real public-data software validation only; it does not change the biological-interpretation boundary.
+
 Historical `v0.1.0-validated` focused audit:
 
 - Full focused local Nextflow run: completed.
