@@ -31,6 +31,7 @@ For a beginner-friendly copy-paste walkthrough, see [`docs/quickstart.md`](docs/
 For examples of expected output folders, key report files, and validation commands, see [`docs/example_outputs.md`](docs/example_outputs.md).
 For optional publication modules and strict optional-output validation, see [`docs/optional_modules.md`](docs/optional_modules.md).
 For managed heavy database setup, see [`docs/database_management.md`](docs/database_management.md).
+For the maintained `dulab` remote setup and shared `/mnt/storage/db` policy, see [`docs/dulab_remote_runbook.md`](docs/dulab_remote_runbook.md).
 For report table purposes, column groups, and interpretation boundaries, see [`docs/output_schema.md`](docs/output_schema.md).
 For setup, optional-tool, database, container, and validation troubleshooting, see [`docs/troubleshooting.md`](docs/troubleshooting.md).
 For the future public real-data validation plan, see [`docs/v0.5_real_data_validation_plan.md`](docs/v0.5_real_data_validation_plan.md).
