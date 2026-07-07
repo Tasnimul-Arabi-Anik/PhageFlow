@@ -4,6 +4,27 @@
 
 - No unreleased changes.
 
+## v0.5.0-public-validation - 2026-07-07
+
+PhageFlow v0.5.0-public-validation is a release-polish and public-data software-validation release. It keeps the same lightweight default workflow scope as `v0.4.0-validated`, adds public NCBI single-genome and small-cohort validation evidence, improves reviewer-facing documentation, and preserves the boundary that PhageFlow outputs are software artifacts unless a separate biological-validation effort is performed.
+
+Validation state:
+
+- Public NCBI Nucleotide single-genome and small-cohort examples completed on the maintained `dulab` setup and passed the expected validator contracts.
+- Completed-run summarize and package utilities were exercised on both public example outputs, with package checksums recorded.
+- Python utility and regression checks passed, including optional-summary, validator-optionals, lightweight metrics, PhageFlow DB helpers, pangenome-sensitivity, network-context, and figure-manifest tests.
+- Shell syntax checks passed.
+- GitHub static CI includes the figure-manifest regression test and remains the required remote gate before tagging.
+- Final tagging should use a commit that has passed local static checks, the local validation suite, and GitHub CI.
+
+Release polish and reviewability:
+
+- Added public real-data software-validation evidence with input provenance, commands, validator outcomes, package checksums, and interpretation boundaries.
+- Added managed database setup documentation and a `dulab` remote runbook for shared `/mnt/storage/db` database reuse.
+- Added output schema, example-output, troubleshooting, comparison/benchmarking, public example-data policy, real-data validation plan, and heavy optional validation runbook documentation.
+- Added a manual GitHub Actions Nextflow smoke workflow for optional maintainer-triggered runtime checks.
+- Updated release metadata to distinguish the published `v0.4.0-validated` scope from the post-v0.4 public-validation release candidate.
+
 ## v0.4.0-validated - 2026-07-01
 
 PhageFlow v0.4.0 is validated as a local, reproducible software workflow for lightweight single-genome and small-cohort phage genome analysis with heavier modules kept disabled by default. This release expands optional analysis coverage, completed-run QA summaries, report imports, and handoff documentation while preserving conservative software-artifact claims.
