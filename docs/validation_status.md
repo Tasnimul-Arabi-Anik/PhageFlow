@@ -1,12 +1,12 @@
 # PhageFlow Validation Status
 
-Status: `v0.4.0-validated`
+Status: `v0.5.0-public-validation`
 
-Validation date: 2026-07-01
+Validation date: 2026-07-07
 
 ## Scope
 
-PhageFlow is complete for the current lightweight single-genome and small-cohort genome-analysis scope. This status covers software workflow execution, report generation, validation checks, completed-run QA utilities, optional artifact and metric summaries, local reference-context reporting, optional heavy wrapper contracts, container smoke validation, and package export. It does not claim domain interpretation or manuscript-grade biological conclusions.
+PhageFlow is complete for the current lightweight single-genome and small-cohort genome-analysis scope. This status covers software workflow execution, report generation, validation checks, completed-run QA utilities, optional artifact and metric summaries, local reference-context reporting, optional heavy wrapper contracts, container smoke validation, package export, and public single-genome/small-cohort software-validation evidence. It does not claim domain interpretation or manuscript-grade biological conclusions.
 
 ## Completed
 
@@ -23,17 +23,21 @@ PhageFlow is complete for the current lightweight single-genome and small-cohort
 - Report-import support for completed pangenome-sensitivity comparisons and completed vConTACT2-style network summaries.
 - Local reference-context branch for samplesheets with `role=reference`.
 - Strict validator coverage for pangenome rows, marker-tree outputs, host-context outputs, CRISPR spacer hits, optional-module outputs, optional summary/metric rows, and local reference-context outputs when requested.
+- Public-data software-validation evidence for one single-genome run and one small-cohort run using public NCBI Nucleotide FASTA inputs.
+- CI coverage for figure manifest ordering, relative paths, byte counts, and SHA256 recording.
 
 ## Validation Evidence
 
-Release validation commands for `v0.4.0-validated`:
+Release validation commands for `v0.5.0-public-validation`:
 
 - `python3 -m py_compile bin/*.py tests/*.py`
 - `python3 tests/test_optional_tool_summary.py`
 - `python3 tests/test_validator_optionals.py`
 - `python3 tests/test_lightweight_metrics.py`
+- `python3 tests/test_phageflow_db.py`
 - `python3 tests/test_pangenome_sensitivity.py`
 - `python3 tests/test_network_context_summary.py`
+- `python3 tests/test_build_report_figures.py`
 - `bash -n bin/phageflow bin/run_local_validation.sh bin/container_smoke_test.sh`
 - `git diff --check`
 - `bash bin/run_local_validation.sh`
@@ -48,10 +52,11 @@ Release validation outcomes:
 - Marker-tree validator check: passed in bundled marker-tree validation run.
 - Default PhaBOX2 behavior check: disabled optional module reports `not_run`.
 - Missing PhaBOX2 database check: `--run_phabox true` exits with a clear `--phabox_db` requirement.
-- GitHub CI: passed for baseline v0.4 PhaBOX2 wrapper commit `4efb1bd`; GitHub static CI remains the required remote gate before tagging.
+- Public-data software-validation pilot: passed for the recorded single-genome and small-cohort examples.
+- GitHub CI: passed for the release-preparation commit; GitHub static CI remains the required remote gate before tagging.
 - GitHub Actions includes a manual `Nextflow smoke` workflow for maintainers to run a bundled Nextflow smoke test on demand. This manual workflow is optional and should not be treated as a required PR gate until runtime reliability is separately recorded.
 
-Post-`v0.4.0` public-data software-validation pilot:
+Public-data software-validation pilot:
 
 - Public NCBI Nucleotide single-genome and small-cohort examples were run on the maintained `dulab` setup.
 - Both public example runs completed and passed the validator for their expected workflow contracts.
@@ -82,9 +87,13 @@ The historical artifact audit did not rerun the workflow, print table contents, 
 - Manuscript-grade biological conclusion: not claimed.
 - Wet-lab design, engineering, host-range expansion, synthesis, or virulence-enhancement support: not provided by this pipeline.
 
+## Historical v0.4.0 Evidence
+
+The `v0.4.0-validated` release validation is preserved in [`v0.4_release_validation.md`](v0.4_release_validation.md).
+
 ## Remaining Deferred Work
 
-Remaining work after `v0.4.0-validated` is future feature work, not release-blocking core validation:
+Remaining work after `v0.5.0-public-validation` is future feature work, not release-blocking core validation:
 
 - Public-database taxonomy assignment after a database/version/provenance policy is defined.
 - Metagenomic discovery after a separate input contract and validation dataset exist.

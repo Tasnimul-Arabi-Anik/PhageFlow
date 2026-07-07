@@ -30,6 +30,7 @@ jobs:
           python3 tests/test_phageflow_db.py
           python3 tests/test_pangenome_sensitivity.py
           python3 tests/test_network_context_summary.py
+          python3 tests/test_build_report_figures.py
 
       - name: Check shell script syntax
         run: bash -n bin/phageflow bin/run_local_validation.sh bin/container_smoke_test.sh
