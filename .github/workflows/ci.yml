@@ -22,6 +22,9 @@ jobs:
       - name: Compile Python utilities
         run: python3 -m py_compile bin/*.py tests/*.py
 
+      - name: Install report test dependencies
+        run: python3 -m pip install --disable-pip-version-check pandas matplotlib seaborn
+
       - name: Run Python regression tests
         run: |
           python3 tests/test_optional_tool_summary.py
